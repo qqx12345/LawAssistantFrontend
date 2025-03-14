@@ -102,10 +102,12 @@ const Login = () => {
                 setTimeout(() => { reject(new Error('Login failed')); }, 2000);
             });
             const response = await Promise.race<Response>([
-                fetch('/login', {
+                fetch('/api/user/login', {
                     method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
                     body: JSON.stringify({ username, password }),
-                    headers: { 'Content-Type': 'application/json' }
                 }),
                 timeoutPromise
             ]);
