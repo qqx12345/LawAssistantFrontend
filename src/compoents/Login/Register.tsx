@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 
 // 定义Userdata类型
 type UserData = {
@@ -15,6 +15,10 @@ const RegisterForm = ({ userdata, setUserdata }: { userdata: UserData, setUserda
     // 提交表单时的处理函数
     const onRegister = (e: React.FormEvent) => {
         e.preventDefault();
+        if (userdata.password !== userdata.confirmPassword) {
+            alert("两次密码不一致");
+            return;
+        }
         const submit = async () => {
             try {
                 const response = await fetch('/api/user/register', {
@@ -36,7 +40,7 @@ const RegisterForm = ({ userdata, setUserdata }: { userdata: UserData, setUserda
                     throw new Error(`注册失败: ${data.message || '未知错误'}`);
                 }
             } catch (error) {
-                console.error("请求失败：", error.message); // 捕获并处理错误
+                console.error("请求失败：", (error as Error).message); // 使用类型断言
             }
         };
         submit();
