@@ -89,7 +89,6 @@ const Login = () => {
     const [password, setPassword] = useState('');
     const [rememberMe, setRememberMe] = useState(false);
     const [error, setError] = useState('');
-
     const onLogin = async(e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         if (username.trim() === '' || password.trim() === '') {
@@ -111,22 +110,27 @@ const Login = () => {
                 }),
                 timeoutPromise
             ]);
+            const data = await response.json();
             if (!response.ok) {
                 console.error(response);
                 setError('登录失败');
                 return;
             }
+            console.log(data);
+            
             console.log('login success');
             if (rememberMe) {
                 localStorage.setItem('username', username);
                 localStorage.setItem('password', password);
                 localStorage.setItem('rememberMe', 'true');
+                localStorage.setItem('token', data.data.token);
             } else {
                 localStorage.removeItem('username');
                 localStorage.removeItem('password');
                 localStorage.setItem('rememberMe', 'false');
+                localStorage.setItem('token', data.data.token);
             }
-            setTimeout(() => navigate('/login'), 2000);
+            setTimeout(() => navigate('/index'), 2000);
         } catch (e) {
             console.error(e);
             setError('登录失败');

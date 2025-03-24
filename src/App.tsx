@@ -4,6 +4,7 @@ import './App.css';
 import Login from './compoents/Login/Login'; 
 import Chat from './compoents/Aichat/Chat';
 import Register from './compoents/Login/Register';
+import Index from './compoents/Index/Index';
 
 function App() {
   return (
@@ -14,6 +15,7 @@ function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/chat" element={<Chat/>}></Route>
           <Route path="/register" element={<Register/>}></Route>
+          <Route path="/index" element={<Index/>}></Route>
         </Routes>
       </BrowserRouter>
     </QueryClientProvider>
