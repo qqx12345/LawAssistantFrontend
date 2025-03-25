@@ -282,16 +282,26 @@ const Index = () => {
                         {search.array.length > 0 ? (
                             search.array.filter(item => !selectedType || item.type === selectedType).slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage)
                             .map((el) => (
-                                <div key={el.id} className={Style.listitem}>
-                                    <div className={Style.itemcontent}>{el.title}</div>
-                                    <div className={Style.moreinf}>
-                                        <div className={Style.time}>{el.time}</div>
-                                        <div className={Style.download}>
-                                            <span className={Style.downloadText}>下载</span>
-                                            <LuDownload className={Style.downloadIcon} onClick={() => download(el.id)} />
-                                        </div>
-                                    </div>
+                                <div className={Style.card} key={el.id}>
+                                <div className={Style.topSection}>
+                                  <div className={Style.border}></div>
+                                  <span className={Style.title}>{el.title}</span>
                                 </div>
+                                <div className={Style.bottomSection}>
+                                  <div className={Style.row}>
+                                    <div className={Style.item}>
+                                      <span className={Style.bigText}>{el.time}</span>
+                                    </div>
+                                    <div className={Style.item}>
+                                      <span className={Style.bigText}>{el.type}</span>
+                                    </div>
+                                    <div className={Style.item}>
+                                      <LuDownload className={Style.downloadIcon} onClick={()=>download(el.id)}></LuDownload>
+                                      <span className={Style.regularText}>download</span>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
                             ))
                         ) : (
                             <div>No data found.</div>
