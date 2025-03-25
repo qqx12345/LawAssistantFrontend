@@ -5,6 +5,8 @@ import { FaSearch } from "react-icons/fa";
 import { BiChevronRight } from "react-icons/bi";
 import { LuDownload } from "react-icons/lu";
 import { FiFilter } from "react-icons/fi";
+import { Link } from "react-router";
+import { token } from "../../share/share.ts";
 type Headers = {
     id: number,
     content: string,
@@ -153,7 +155,10 @@ const Headers: React.FC<HeadersProps> = ({ setsearch, token, searchmode, setsear
                 </a>
             </div>
             <div className={Style.right}>
-                <button>个人资料</button>
+                <Link to='/user'>
+                <button className="bg-blue-400 rounded-full hover:bg-blue-500 text-white shadow-lg 
+                transition-colors duration-300 ease-in-out px-4 py-2">个人资料</button>
+                </Link>
             </div>
         </div>
     )
@@ -210,7 +215,6 @@ const Index = () => {
     const [itemsPerPage] = useState(10);
     const [searchmode, setsearchmode] = useState(2);
     const [selectedType, setSelectedType] = useState<string>('');
-    const token = localStorage.getItem("token")
     useEffect(() => {
         console.log(search);
     }, [search]);
