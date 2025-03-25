@@ -2,7 +2,7 @@ import { QueryClient, QueryClientProvider } from 'react-query';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import './App.css';
 import Login from './compoents/Login/Login'; 
-import Chat from './compoents/Aichat/Chat';
+import Chat from './compoents/Aichat/index';
 import Register from './compoents/Login/Register';
 import Index from './compoents/Index/Index';
 

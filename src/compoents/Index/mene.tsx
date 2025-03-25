@@ -3,12 +3,13 @@ import { FaDownload, FaHome, FaCloudUploadAlt, FaFolderOpen } from "react-icons/
 import { FaFileCirclePlus,FaFileCircleCheck } from "react-icons/fa6";
 import { IoCloseSharp } from "react-icons/io5";
 import { useState, useRef, useEffect, forwardRef } from 'react';
+import { token } from '../../share/share';
 
 const UploadModal = forwardRef(({ setupload }: { setupload: React.Dispatch<React.SetStateAction<boolean>> }, ref: React.ForwardedRef<HTMLDivElement>) => {
 
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [uploadStatus, setUploadStatus] = useState<'idle' | 'uploading'>('idle');
-  const token = localStorage.getItem('token');
+
 
   const loadfile = async () => {
     if (!selectedFile) return;
