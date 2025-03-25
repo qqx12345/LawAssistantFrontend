@@ -5,7 +5,7 @@ import { FaSearch } from "react-icons/fa";
 import { BiChevronRight } from "react-icons/bi";
 import { LuDownload } from "react-icons/lu";
 import { FiFilter } from "react-icons/fi";
-import { Link } from "react-router";
+import { Link, useNavigate } from "react-router";
 import { token } from "../../share/share.ts";
 type Headers = {
     id: number,
@@ -42,6 +42,7 @@ type HeadersProps = {
 const Headers: React.FC<HeadersProps> = ({ setsearch, token, searchmode, setsearchmode }) => {
     const [check, setCheck] = useState(1);
     const [input, setInput] = useState<string>("");
+    const navigate = useNavigate();
     const list: Headers[] = [
         { id: 1, content: "法律法规", pick: check === 1 },
         { id: 2, content: "法学期刊", pick: check == 2 },
@@ -52,6 +53,7 @@ const Headers: React.FC<HeadersProps> = ({ setsearch, token, searchmode, setsear
         { id: 2, content: "关键词搜索", path: "keyword", check: 2 === searchmode },
         { id: 3, content: "高级搜索", path: "advanced", check: 3 === searchmode }
     ]
+
     const modeList = useRef<(HTMLDivElement | null)>(null);
 
     const disPlay = (): void => {
@@ -112,6 +114,12 @@ const Headers: React.FC<HeadersProps> = ({ setsearch, token, searchmode, setsear
             console.error("Error fetching data:", error);
         }
     };
+    const handleNavClick = (id: number) => {
+        setCheck(id);
+        if (id === 3) {
+            navigate('/chat');
+        }
+    }
 
 
     return (
@@ -122,10 +130,12 @@ const Headers: React.FC<HeadersProps> = ({ setsearch, token, searchmode, setsear
                 </div>
                 {list.map((element) => {
                     return (
+
                         <div
                             className={`${Style.item} ${element.pick ? Style.picked : ""}`} // 动态添加类名
                             key={element.id}
-                            onClick={() => setCheck(element.id)}
+                            onClick={() => handleNavClick(element.id)}
+                            
                         >
                             {element.content}
                         </div>

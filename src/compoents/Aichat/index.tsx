@@ -1,14 +1,15 @@
 import { useState } from "react";
 import ChatBox from "./ChatBox"
 import DisplayMessage from "./Display";
-import HistoryBar from "./HistorySIdeBar";
+import HistorySideBar from "./HistorySideBar";
+
 
 const Chat = () => {
     const [message, setMessage] = useState("");
     return (
         <div>
             <ChatBox setMessage={setMessage}/>
-            <HistoryBar />
+            <HistorySideBar />
             <DisplayMessage messages={message} />
         </div>
     )
