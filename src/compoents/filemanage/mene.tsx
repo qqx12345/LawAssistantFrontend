@@ -31,14 +31,14 @@ const UploadModal = forwardRef(({ setupload }: { setupload: React.Dispatch<React
       console.error('上传失败，状态码:', result.error);
     }
     setUploadStatus('idle');
-    setupload(false);
+    close();
   }
 
   function close(){
       setupload(false);
       setTimeout(() => {
         setSelectedFile(null)
-      }, 1000);
+      }, 500);
   }
   return (
     <div className={styles.modal} ref={ref}>
