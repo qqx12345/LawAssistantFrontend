@@ -15,7 +15,7 @@
   background: linear-gradient(
     150deg, 
     var(--gradient-start) 20%, 
-    var(--gradient-end) 80%
+    var(--gradient-end) 70%
   );
   padding: 2rem 5%;
 }
