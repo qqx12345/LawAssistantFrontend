@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { token } from "../../share/share";
-import { ComplaintData, Content, ContraryInputProps, Parties } from "./props";
+import { AdviceData, ComplaintData, Content, ContraryInputProps, Parties } from "./props";
+import { getTheme } from "../../apis/fetch";
 
 const ContraryInput = ({ title, parties, content, additional, onChange }: ContraryInputProps) => {
   return (
@@ -236,6 +237,8 @@ const ChatBox = ({ setMessage }) => {
     attachments: []
   });
 
+  const [adviceData, setAdviceData] = useState<AdviceData>();
+
   const SelectBar = () => {
     return (
       <div className="btn-group mb-4">
@@ -312,7 +315,7 @@ const ChatBox = ({ setMessage }) => {
         },
         body: JSON.stringify({
           userMessage: userMessage,
-          model: model,
+          model: model, 
         }),
       });
       if (response.status === 200) {
@@ -329,7 +332,7 @@ const ChatBox = ({ setMessage }) => {
         body: JSON.stringify({
           model: model,
           content: userChat,
-          theme: ""
+          theme: getTheme()
         }),
       });
       if (response.status === 200) {
