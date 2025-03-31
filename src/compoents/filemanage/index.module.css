@@ -1,5 +1,5 @@
 :root {
-    background-color: #f2f3f5;
+    background-color: #e3ebff;
     box-sizing: border-box;
     --primary-color: #467a96;       /* 主色调（原深蓝） */
     --secondary-color: #96c8fa;    /* 辅助色（浅蓝） */
@@ -17,12 +17,13 @@ html {
 
 
 .container {
+    background-color: #e3ebff;
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
     margin: 0 auto;
-    min-height: 90vh;
+    min-height: 100vh;
 }
 
 .header {
@@ -199,7 +200,7 @@ html {
     min-height: 60vh;
     margin: 30px auto 1vh;
     transition: all 0.5s ease;
-    background-color: rgb(255, 255, 255);
+    background-color: rgb(243, 248, 255);
     padding: 15px 25px;
     padding-bottom: 40px;
     border-radius: 8px;
