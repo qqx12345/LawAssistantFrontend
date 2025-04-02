@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef} from "react";
 import Style from './index.module.css'
 import CustomComponent from './mene.tsx'
 import { FaSearch } from "react-icons/fa";
@@ -6,6 +6,7 @@ import { BiChevronRight } from "react-icons/bi";
 import { LuDownload } from "react-icons/lu";
 import { FiFilter } from "react-icons/fi";
 import { Link, useNavigate } from "react-router";
+import AdBanner from "../tuisong/tuisong.tsx";
 import { token } from "../../share/share.ts";
 type Headers = {
     id: number,
@@ -75,8 +76,8 @@ const Headers: React.FC<HeadersProps> = ({ setsearch, token, searchmode, setsear
 
     useEffect(() => {
         searchdata();
-    },[]);
-    
+    }, []);
+
     async function searchdata() {
         const result = Path.find((el) => el.id === searchmode);
         const raw = JSON.stringify({
@@ -99,7 +100,7 @@ const Headers: React.FC<HeadersProps> = ({ setsearch, token, searchmode, setsear
 
             const data = await res.json();
 
-            const filteredData = data.data.documents.map((item) => ({
+            const filteredData = data.data.documents.map((item:any) => ({
                 id: item.id,
                 title: item.title,
                 time: item.update_time ? item.update_time.slice(0, 10) : "",
@@ -126,7 +127,7 @@ const Headers: React.FC<HeadersProps> = ({ setsearch, token, searchmode, setsear
         <div className={Style.header}>
             <div className={Style.nav}>
                 <div className={Style.logo}>
-                    <img src="/public/vite.svg" alt="logo" style={{ width: '100%' }} />
+                    <img src="/vite.svg" alt="logo" style={{ width: '100%' }} />
                 </div>
                 {list.map((element) => {
                     return (
@@ -135,13 +136,12 @@ const Headers: React.FC<HeadersProps> = ({ setsearch, token, searchmode, setsear
                             className={`${Style.item} ${element.pick ? Style.picked : ""}`} // 动态添加类名
                             key={element.id}
                             onClick={() => handleNavClick(element.id)}
-                            
+
                         >
                             {element.content}
                         </div>
                     );
                 })}
-                <div className={Style.item}>更多</div>
             </div>
             <div className={Style.secrch}>
                 <div className={Style.modelist} ref={modeList}>
@@ -166,7 +166,7 @@ const Headers: React.FC<HeadersProps> = ({ setsearch, token, searchmode, setsear
             </div>
             <div className={Style.right}>
                 <Link to='/user'>
-                <button className="bg-blue-400 rounded-full hover:bg-blue-500 text-white shadow-lg 
+                    <button className="bg-blue-400 rounded-full hover:bg-blue-500 text-white shadow-lg 
                 transition-colors duration-300 ease-in-out px-4 py-2">个人资料</button>
                 </Link>
             </div>
@@ -218,6 +218,8 @@ const Search = () => {
         </div>
     )
 }
+
+
 
 const Index = () => {
     const [search, setsearch] = useState<response>({ total: 0, array: [] });
@@ -273,72 +275,75 @@ const Index = () => {
         <div className={Style.container}>
             <Headers setsearch={setsearch} token={token} setsearchmode={setsearchmode} searchmode={searchmode} />
             {searchmode === 3 && <Search />}
-            <div className={Style.content}>
-                <div className={Style.list}>
-                    <div className={Style.op}>
-                        <div className={Style.select}><FiFilter /></div>
-                        <div className={Style.filters}>
-                            <span>类型筛选:</span>
-                            <input id="r0" type="radio" name="radio" checked={!selectedType} onChange={() => setSelectedType('')} />
-                            <label htmlFor="r0">全部</label>
-                            <input id="r1" type="radio" name="radio" value="txt" onChange={() => filter('txt')} />
-                            <label htmlFor="r1">txt</label>
-                            <input id="r2" type="radio" name="radio" value="pdf" onChange={() => filter('pdf')} />
-                            <label htmlFor="r2">pdf</label>
-                            <input id="r3" type="radio" name="radio" value="docx" onChange={() => filter('word')} />
-                            <label htmlFor="r3">word</label>
+            <div className={Style.banner}>
+                <AdBanner token={token}/>
+                <div className={Style.content}>
+                    <div className={Style.list}>
+                        <div className={Style.op}>
+                            <div className={Style.select}><FiFilter /></div>
+                            <div className={Style.filters}>
+                                <span>类型筛选:</span>
+                                <input id="r0" type="radio" name="radio" checked={!selectedType} onChange={() => setSelectedType('')} />
+                                <label htmlFor="r0">全部</label>
+                                <input id="r1" type="radio" name="radio" value="txt" onChange={() => filter('txt')} />
+                                <label htmlFor="r1">txt</label>
+                                <input id="r2" type="radio" name="radio" value="pdf" onChange={() => filter('pdf')} />
+                                <label htmlFor="r2">pdf</label>
+                                <input id="r3" type="radio" name="radio" value="docx" onChange={() => filter('word')} />
+                                <label htmlFor="r3">word</label>
+                            </div>
+                        </div>
+                        <div className={Style.total}>
+                            Total: {selectedType ? search.array.filter(item => item.type === selectedType).length : search.total}
+                        </div>
+                        <div className={Style.datalist}>
+                            {search.array.length > 0 ? (
+                                search.array.filter(item => !selectedType || item.type === selectedType).slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage)
+                                    .map((el) => (
+                                        <div className={Style.card} key={el.id}>
+                                            <div className={Style.topSection}>
+                                                <div className={Style.border}></div>
+                                                <span className={Style.title}>{el.title}</span>
+                                            </div>
+                                            <div className={Style.bottomSection}>
+                                                <div className={Style.row}>
+                                                    <div className={Style.item}>
+                                                        <span className={Style.bigText}>{el.time}</span>
+                                                    </div>
+                                                    <div className={Style.item}>
+                                                        <span className={Style.bigText}>{el.type}</span>
+                                                    </div>
+                                                    <div className={Style.item}>
+                                                        <LuDownload className={Style.downloadIcon} onClick={() => download(el.id)}></LuDownload>
+                                                        <span className={Style.regularText}>download</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    ))
+                            ) : (
+                                <div>No data found.</div>
+                            )}
                         </div>
                     </div>
-                    <div className={Style.total}>
-                        Total: {selectedType ? search.array.filter(item => item.type === selectedType).length : search.total}
-                    </div>
-                    <div className={Style.datalist}>
-                        {search.array.length > 0 ? (
-                            search.array.filter(item => !selectedType || item.type === selectedType).slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage)
-                            .map((el) => (
-                                <div className={Style.card} key={el.id}>
-                                <div className={Style.topSection}>
-                                  <div className={Style.border}></div>
-                                  <span className={Style.title}>{el.title}</span>
-                                </div>
-                                <div className={Style.bottomSection}>
-                                  <div className={Style.row}>
-                                    <div className={Style.item}>
-                                      <span className={Style.bigText}>{el.time}</span>
-                                    </div>
-                                    <div className={Style.item}>
-                                      <span className={Style.bigText}>{el.type}</span>
-                                    </div>
-                                    <div className={Style.item}>
-                                      <LuDownload className={Style.downloadIcon} onClick={()=>download(el.id)}></LuDownload>
-                                      <span className={Style.regularText}>download</span>
-                                    </div>
-                                  </div>
-                                </div>
-                              </div>
-                            ))
-                        ) : (
-                            <div>No data found.</div>
-                        )}
+                    <div className={Style.pagination}>
+                        <button
+                            onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                            disabled={currentPage === 1}
+                        >
+                            上一页
+                        </button>
+
+                        <span>第 {currentPage} 页 / 共 {Math.ceil(search.total / itemsPerPage)} 页</span>
+
+                        <button
+                            onClick={() => setCurrentPage(p => p + 1)}
+                            disabled={currentPage * itemsPerPage >= search.total}
+                        >
+                            下一页
+                        </button>
                     </div>
                 </div>
-            </div>
-            <div className={Style.pagination}>
-                <button
-                    onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
-                    disabled={currentPage === 1}
-                >
-                    上一页
-                </button>
-
-                <span>第 {currentPage} 页 / 共 {Math.ceil(search.total / itemsPerPage)} 页</span>
-
-                <button
-                    onClick={() => setCurrentPage(p => p + 1)}
-                    disabled={currentPage * itemsPerPage >= search.total}
-                >
-                    下一页
-                </button>
             </div>
             <CustomComponent />
         </div>

@@ -1,5 +1,5 @@
 :root {
-    background-color: #e3ebff;
+    --background-color: #e3ebff;
     box-sizing: border-box;
     --primary-color: #467a96;       /* 主色调（原深蓝） */
     --secondary-color: #96c8fa;    /* 辅助色（浅蓝） */
@@ -7,7 +7,8 @@
     --gradient-start: #b3d3ff;     /* 渐变起始色 */
     --gradient-end: #f4f8ff;       /* 渐变结束色 */
     --success-green: #34D399;      /* 新增成功色 */
-    --warning-orange: #F59E0B; 
+    --warning-orange: #F59E0B;
+    --simple-bule:rgb(78, 166, 249);
 }
 
 html {
@@ -17,13 +18,13 @@ html {
 
 
 .container {
-    background-color: #e3ebff;
+    background-color: var(--background-color);
     display: flex;
     flex-direction: column;
     justify-content: center;
-    align-items: center;
     margin: 0 auto;
     min-height: 100vh;
+    min-width: 100vh;
 }
 
 .header {
@@ -60,7 +61,12 @@ html {
     margin-right: 40px;
 }
 .content{
-    width: 90vw;
+    width: 70vw;
+    margin-right: 30px;
+}
+
+.banner {
+    display: flex;
     flex: 1;
 }
 
@@ -197,8 +203,8 @@ html {
     flex-direction: column;
     gap: 15px;
     max-width: 1000px;
-    min-height: 60vh;
-    margin: 30px auto 1vh;
+    min-height: 70vh;
+    margin: 30px 0 1vh;
     transition: all 0.5s ease;
     background-color: rgb(243, 248, 255);
     padding: 15px 25px;
@@ -258,7 +264,7 @@ html {
     border-radius: 15px;
     display: flex;
     flex-direction: column;
-    background: linear-gradient(45deg, rgb(184, 218, 255) 0%, rgb(78, 166, 249) 78%);
+    background: linear-gradient(45deg, rgb(184, 218, 255) 0%, var(--simple-bule) 78%);
     position: relative;
   }
   
@@ -478,13 +484,14 @@ input[type='radio']:hover:not(:checked) {
 }
 
 .pagination {
+    max-width: 1000px;
     display: flex;
     justify-content: center;
     align-items: center;
     gap: 20px;
     padding: 15px 0;
     color: black;
-    margin-bottom: 3vh;
+    margin: 3vh 0;
 }
 
 .pagination button {
