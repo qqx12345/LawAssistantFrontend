@@ -360,38 +360,6 @@ html {
     border-radius: 5px;
 }
 
-.filters {
-    display: flex;
-    align-items: center;
-    gap: 5px; 
-}
-
-input[type='radio'] {
-    -webkit-appearance: none;
-    -moz-appearance: none;
-    appearance: none;
-    width: 18px;
-    height: 18px;
-    border: 1.5px solid #676767; /* 边框颜色 */
-    border-radius: 50%;
-    margin-left: 3px;
-    cursor: pointer;
-    transition: all 0.3s ease;
-}
-
-/* 选中状态 */
-input[type='radio']:checked {
-    background: var(--accent-color); 
-    box-shadow: inset 0 0 0 3px white; /* 中心白点 */
-}
-
-/* 悬停状态 */
-input[type='radio']:hover:not(:checked) {
-    border-color: #79BBFF;
-    background: #e8f4ff;
-}
-
-
 /* 新增高级搜索样式 */
 .search {
     width: 90vw;
