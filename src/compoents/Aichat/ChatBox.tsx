@@ -1,4 +1,4 @@
-import type React from "react"
+import React from "react"
 
 import { useState, useRef, useEffect } from "react"
 import { token } from "../../share/share"
@@ -18,7 +18,7 @@ const ContraryInput = ({ title, parties, content, additional, onChange }: Contra
           value={value}
           onChange={onChange}
           placeholder={placeholder}
-          className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 focus:outline-none focus:ring-2 focus:ring-[#5d76c5] dark:focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+          className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 focus:outline-none focus:ring-2 focus:ring-[#5d76c5] dark:focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white overflow-auto"
           rows={4}
         />
       ) : (
@@ -142,7 +142,7 @@ const ContraryInput = ({ title, parties, content, additional, onChange }: Contra
   )
 
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6">
+    <div className="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6 overflow-auto">
       <h2 className="text-xl font-bold text-[#3a5199] dark:text-blue-400 mb-6">生成法律合同</h2>
 
       <FormField
@@ -190,7 +190,7 @@ const ComplaintInput = ({
           value={value}
           onChange={onChange}
           placeholder={placeholder}
-          className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 focus:outline-none focus:ring-2 focus:ring-[#5d76c5] dark:focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+          className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 focus:outline-none focus:ring-2 focus:ring-[#5d76c5] dark:focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white overflow-auto"
           rows={4}
         />
       ) : (
@@ -207,7 +207,7 @@ const ComplaintInput = ({
   )
 
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6">
+    <div className="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6 overflow-auto">
       <h2 className="text-xl font-bold text-[#3a5199] dark:text-blue-400 mb-6">生成投诉状</h2>
 
       <FormField
@@ -333,7 +333,7 @@ const AdviceInput = ({ userMessage, setUserMessage }) => {
           value={userMessage}
           onChange={(e) => setUserMessage(e.target.value)}
           placeholder="请详细描述您的法律问题，以便我们提供专业的法律意见..."
-          className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 focus:outline-none focus:ring-2 focus:ring-[#5d76c5] dark:focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+          className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 focus:outline-none focus:ring-2 focus:ring-[#5d76c5] dark:focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white overflow-auto"
           rows={6}
         />
       </div>
@@ -341,11 +341,9 @@ const AdviceInput = ({ userMessage, setUserMessage }) => {
   )
 }
 
-// 聊天输入组件
-const ChatInput = ({ userChat, onChange }) => {
+const ChatInputComponent = ({ userChat, onChange }) => {
   const textareaRef = useRef<HTMLTextAreaElement>(null)
 
-  // 自动调整高度
   useEffect(() => {
     if (textareaRef.current) {
       textareaRef.current.style.height = "auto"
@@ -360,7 +358,7 @@ const ChatInput = ({ userChat, onChange }) => {
         value={userChat}
         onChange={(e) => onChange(e.target.value)}
         placeholder="输入您的问题，按Enter键发送..."
-        className="w-full px-4 py-3 pr-12 rounded-xl border border-gray-200 dark:border-gray-700 focus:outline-none focus:ring-2 focus:ring-[#5d76c5] dark:focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white resize-none min-h-[50px] max-h-[200px]"
+        className="w-full px-4 py-3 pr-12 rounded-xl border border-gray-200 dark:border-gray-700 focus:outline-none focus:ring-2 focus:ring-[#5d76c5] dark:focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white resize-none min-h-[50px] max-h-[200px] overflow-auto"
         onKeyDown={(e) => {
           if (e.key === "Enter" && !e.shiftKey) {
             e.preventDefault()
@@ -372,6 +370,8 @@ const ChatInput = ({ userChat, onChange }) => {
     </div>
   )
 }
+
+const ChatInput = React.memo(ChatInputComponent)
 
 // 主组件
 const ChatBox = ({ setMessage, setIsLoading }) => {
@@ -413,7 +413,7 @@ const ChatBox = ({ setMessage, setIsLoading }) => {
   })
 
   // 投诉表单数据
-  const [complaintData, setComplaintData] = useState<ComplaintData>({
+  c0onst [complaintData, setComplaintData] = useState<ComplaintData>({
     court: "",
     plaintiff: { type: "原告", name: "", details: "" },
     defendant: { type: "被告", name: "", details: "" },
@@ -465,8 +465,8 @@ const ChatBox = ({ setMessage, setIsLoading }) => {
           value={model}
         >
           <option value="moonshot">Moonshot</option>
-          <option value="deepseek-reasoner">Deepseek Reasoner</option>
-          <option value="deepseek-chat">Deepseek Chat</option>
+          <option value="deepseek-reasoner">Deepseek-V1</option>
+          <option value="deepseek-chat">Deepseek-R3</option>
         </select>
       </div>
     )
@@ -639,7 +639,7 @@ const ChatBox = ({ setMessage, setIsLoading }) => {
       {documentType === "" && (
         <form onSubmit={handleUserMessage} className="flex gap-2">
           <div className="flex-1">
-            <ChatInput userChat={userChat} onChange={(data) => setUserChat(data)} />
+            <ChatInput userChat={userChat} onChange={( data) => setUserChat(data)} />
           </div>
           <button
             type="submit"

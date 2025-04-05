@@ -69,9 +69,6 @@ const Chat = () => {
           {isSidebarOpen ? "关闭侧边栏" : "打开侧边栏"}
         </button>
         <h1 className="text-xl font-bold text-[#3a5199] dark:text-white">法律AI助手</h1>
-        <button onClick={toggleTheme} className="p-2 rounded-lg bg-gray-200 dark:bg-gray-700">
-          {theme === "light" ? "🌙" : "☀️"}
-        </button>
       </div>
 
       {/* 侧边栏 */}
@@ -112,7 +109,7 @@ const Chat = () => {
         </div>
 
         {/* 对话输入区域 */}
-        <div className="p-4 bg-white dark:bg-gray-800 shadow-inner">
+        <div className="p-4 bg-white dark:bg-gray-800 shadow-inner h-screen overflow-y-auto">
           <ChatBox setMessage={handleSetMessage} setIsLoading={setIsLoading} />
         </div>
       </div>

@@ -12,3 +12,4 @@ export async function getTheme()  {
     // theme = data.message
     return data.data.theme;
 }
+

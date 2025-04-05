@@ -1,5 +1,3 @@
-import type React from "react"
-
 import { useEffect, useState } from "react"
 import { token } from "../../share/share"
 
@@ -68,27 +66,27 @@ const HistorySideBar: React.FC<HistorySideBarProps> = ({ setMessage, theme = "li
       return
     }
 
-    // // 否则请求完整对话
-    // try {
-    //   const response = await fetch(`/api/ai/conversation/${item.id}`, {
-    //     method: "GET",
-    //     headers: {
-    //       "Content-Type": "application/json",
-    //       Authorization: `Bearer ${token}`,
-    //     },
-    //   })
+    // 否则请求完整对话
+    try {
+      const response = await fetch(`/api/ai/conversation/${item.id}`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      })
 
-    //   if (response.ok) {
-    //     const result = await response.json()
-    //     // 更新本地数据，缓存响应
-    //     setData((prevData) => prevData.map((d) => (d.id === item.id ? { ...d, response: result.data.response } : d)))
-    //     setMessage(result.data.response)
-    //   } else {
-    //     console.error("获取对话详情失败")
-    //   }
-    // } catch (error) {
-    //   console.error("请求对话详情出错", error)
-    // }
+      if (response.ok) {
+        const result = await response.json()
+        // 更新本地数据，缓存响应
+        setData((prevData) => prevData.map((d) => (d.id === item.id ? { ...d, response: result.data.response } : d)))
+        setMessage(result.data.response)
+      } else {
+        console.error("获取对话详情失败")
+      }
+    } catch (error) {
+      console.error("请求对话详情出错", error)
+    }
   }
 
   const filteredData = data.filter((item) => item.content.toLowerCase().includes(searchTerm.toLowerCase()))
