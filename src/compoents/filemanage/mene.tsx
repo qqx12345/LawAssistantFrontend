@@ -19,6 +19,7 @@ const UploadModal = forwardRef(({ setupload }: { setupload: React.Dispatch<React
     const category = ['doc', 'docx'].includes(fileExt) ? 'word' : fileExt;
     formData.append('category', category);
     formData.append('file', selectedFile);
+    formData.append('public', "1");
     const response = await fetch('/api/file/upload', {
       method: 'POST',
       headers: {

@@ -79,7 +79,7 @@ const Chat = () => {
         md:w-1/4 w-full fixed md:relative h-screen z-20
       `}
       >
-        {/* <HistorySideBar setMessage={handleSetMessage} theme={theme} /> */}
+        <HistorySideBar setMessage={handleSetMessage} theme={theme} />
       </div>
 
       {/* 主体内容 */}

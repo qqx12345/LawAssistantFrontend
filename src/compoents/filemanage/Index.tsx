@@ -4,8 +4,8 @@ import CustomComponent from './mene.tsx'
 import { FaSearch } from "react-icons/fa";
 import { BiChevronRight } from "react-icons/bi";
 import { LuDownload } from "react-icons/lu";
-import { FiFilter } from "react-icons/fi";
 import { Link, useNavigate } from "react-router";
+import AdBanner from "../tuisong/tuisong.tsx";
 import { token } from "../../share/share.ts";
 type Headers = {
     id: number,
@@ -37,6 +37,11 @@ type HeadersProps = {
     setsearch: React.Dispatch<React.SetStateAction<response>>,
     setsearchmode: React.Dispatch<React.SetStateAction<number>>, // 新增
     searchmode: number // 新增
+};
+
+type SearchProps = {
+    setsearch: React.Dispatch<React.SetStateAction<response>>;
+    token: string | null;
 };
 
 const Headers: React.FC<HeadersProps> = ({ setsearch, token, searchmode, setsearchmode }) => {
@@ -75,8 +80,8 @@ const Headers: React.FC<HeadersProps> = ({ setsearch, token, searchmode, setsear
 
     useEffect(() => {
         searchdata();
-    },[]);
-    
+    }, []);
+
     async function searchdata() {
         const result = Path.find((el) => el.id === searchmode);
         const raw = JSON.stringify({
@@ -99,7 +104,7 @@ const Headers: React.FC<HeadersProps> = ({ setsearch, token, searchmode, setsear
 
             const data = await res.json();
 
-            const filteredData = data.data.documents.map((item) => ({
+            const filteredData = data.data.documents.map((item: any) => ({
                 id: item.id,
                 title: item.title,
                 time: item.update_time ? item.update_time.slice(0, 10) : "",
@@ -126,7 +131,7 @@ const Headers: React.FC<HeadersProps> = ({ setsearch, token, searchmode, setsear
         <div className={Style.header}>
             <div className={Style.nav}>
                 <div className={Style.logo}>
-                    <img src="/public/vite.svg" alt="logo" style={{ width: '100%' }} />
+                    <img src="/vite.svg" alt="logo" style={{ width: '100%' }} />
                 </div>
                 {list.map((element) => {
                     return (
@@ -135,13 +140,12 @@ const Headers: React.FC<HeadersProps> = ({ setsearch, token, searchmode, setsear
                             className={`${Style.item} ${element.pick ? Style.picked : ""}`} // 动态添加类名
                             key={element.id}
                             onClick={() => handleNavClick(element.id)}
-                            
+
                         >
                             {element.content}
                         </div>
                     );
                 })}
-                <div className={Style.item}>更多</div>
             </div>
             <div className={Style.secrch}>
                 <div className={Style.modelist} ref={modeList}>
@@ -166,7 +170,7 @@ const Headers: React.FC<HeadersProps> = ({ setsearch, token, searchmode, setsear
             </div>
             <div className={Style.right}>
                 <Link to='/user'>
-                <button className="bg-blue-400 rounded-full hover:bg-blue-500 text-white shadow-lg 
+                    <button className="bg-blue-400 rounded-full hover:bg-blue-500 text-white shadow-lg 
                 transition-colors duration-300 ease-in-out px-4 py-2">个人资料</button>
                 </Link>
             </div>
@@ -174,20 +178,83 @@ const Headers: React.FC<HeadersProps> = ({ setsearch, token, searchmode, setsear
     )
 }
 
-const Search = () => {
+const Search: React.FC<SearchProps> = ({ setsearch, token }) => {
+    const [searchParams, setSearchParams] = useState({
+        keyword: [""],
+        fileType: "",
+        startDate: "",
+        endDate: "",
+    });
+
+    const handleSearch = async () => {
+        // 日期验证逻辑
+        if (searchParams.startDate && searchParams.endDate &&
+            new Date(searchParams.startDate) > new Date(searchParams.endDate)) {
+            alert("开始日期不能大于结束日期");
+            return;
+        }
+
+        // 准备搜索参数
+        const params = {
+            Keywords: searchParams.keyword,
+            Category: searchParams.fileType,
+            StartDate: searchParams.startDate,
+            EndDate: searchParams.endDate,
+            Filename: ""
+        };
+
+        // 调用父组件搜索逻辑
+        console.log("Search parameters:", params);
+        const raw = JSON.stringify(params);
+        try {
+            const res = await fetch(`/api/file/search/advanced`, {
+                method: "POST",
+                headers: {
+                    "Authorization": `Bearer ${token}`,
+                    "Content-Type": "application/json"
+                },
+                body: raw
+            });
+
+            if (!res.ok) {
+                throw new Error(`HTTP error! Status: ${res.status}`);
+            }
+
+            const data = await res.json();
+
+            const filteredData = data.data.documents.map((item: any) => ({
+                id: item.id,
+                title: item.title,
+                time: item.update_time ? item.update_time.slice(0, 10) : "",
+                type: item.type
+            }));
+
+            setsearch({
+                total: data.data.total,
+                array: filteredData
+            });
+        } catch (error) {
+            console.error("Error fetching data:", error);
+        }
+    };
+
     return (
         <div className={Style.search}>
             <div className={Style.searchContent}>
-                {/* 文件类型选择 */}
                 <div className={Style.searchItem}>
                     <div className={Style.searchLabel}>
                         <span>文件类型:</span>
                     </div>
                     <div className={Style.searchInput}>
-                        <select>
-                            <option value="all">全部</option>
-                            <option value="txt">文本文件</option>
+                        <select
+                            value={searchParams.fileType}
+                            onChange={(e) => setSearchParams(prev => ({ ...prev, fileType: e.target.value }))}
+                        >
+                            <option value="">全部</option>
+                            <option value="txt">txt</option>
                             <option value="pdf">PDF</option>
+                            <option value="docx">docx</option>
+                            <option value="doc">doc</option>
                         </select>
                     </div>
                 </div>
@@ -198,33 +265,49 @@ const Search = () => {
                         <span>时间范围:</span>
                     </div>
                     <div className={Style.searchInput}>
-                        <input type="date" /> 至 <input type="date" />
+                        <input type="date"
+                            value={searchParams.startDate}
+                            onChange={(e) => setSearchParams(prev => ({ ...prev, startDate: e.target.value }))} />
+                        至
+                        <input type="date"
+                            value={searchParams.endDate}
+                            onChange={(e) => setSearchParams(prev => ({ ...prev, endDate: e.target.value }))} />
                     </div>
                 </div>
-
-                {/* 关键词输入 */}
                 <div className={Style.searchItem}>
                     <div className={Style.searchLabel}>
                         <span>关键词:</span>
                     </div>
                     <div className={Style.searchInput}>
-                        <input type="text" placeholder="请输入关键词" />
+                        <input
+                            type="text"
+                            placeholder="请输入关键词"
+                            value={searchParams.keyword}
+                            onChange={(e) => setSearchParams(prev => ({ ...prev, keyword: [e.target.value] }))}
+                        />
                     </div>
                 </div>
-
-                {/* 搜索按钮 */}
-                <button className={Style.searchButton}>开始搜索</button>
+                {/* 操作按钮 */}
+                <div className={Style.buttonGroup}>
+                    <button
+                        className={Style.searchButton}
+                        onClick={handleSearch}
+                    >
+                        开始搜索
+                    </button>
+                </div>
             </div>
         </div>
     )
 }
+
+
 
 const Index = () => {
     const [search, setsearch] = useState<response>({ total: 0, array: [] });
     const [currentPage, setCurrentPage] = useState(1);
     const [itemsPerPage] = useState(10);
     const [searchmode, setsearchmode] = useState(2);
-    const [selectedType, setSelectedType] = useState<string>('');
     useEffect(() => {
         console.log(search);
     }, [search]);
@@ -265,80 +348,65 @@ const Index = () => {
             .catch(error => console.log('Download error:', error));
     }
 
-    // 修改filter函数
-    function filter(fileType: string) {
-        setSelectedType(prev => prev === fileType ? '' : fileType); // 点击相同按钮取消筛选
-    }
     return (
         <div className={Style.container}>
             <Headers setsearch={setsearch} token={token} setsearchmode={setsearchmode} searchmode={searchmode} />
-            {searchmode === 3 && <Search />}
-            <div className={Style.content}>
-                <div className={Style.list}>
-                    <div className={Style.op}>
-                        <div className={Style.select}><FiFilter /></div>
-                        <div className={Style.filters}>
-                            <span>类型筛选:</span>
-                            <input id="r0" type="radio" name="radio" checked={!selectedType} onChange={() => setSelectedType('')} />
-                            <label htmlFor="r0">全部</label>
-                            <input id="r1" type="radio" name="radio" value="txt" onChange={() => filter('txt')} />
-                            <label htmlFor="r1">txt</label>
-                            <input id="r2" type="radio" name="radio" value="pdf" onChange={() => filter('pdf')} />
-                            <label htmlFor="r2">pdf</label>
-                            <input id="r3" type="radio" name="radio" value="docx" onChange={() => filter('word')} />
-                            <label htmlFor="r3">word</label>
+            {searchmode === 3 && <Search setsearch={setsearch} token={token}/>}
+            <div className={Style.banner}>
+                <AdBanner token={token} />
+                <div className={Style.content}>
+                    <div className={Style.list}>
+                        <div className={Style.total}>
+                            Total: {search.total}
+                        </div>
+                        <div className={Style.datalist}>
+                            {search.array.length > 0 ? (
+                                search.array.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage)
+                                    .map((el) => (
+                                        <div className={Style.card} key={el.id}>
+                                            <div className={Style.topSection}>
+                                                <div className={Style.border}></div>
+                                                <span className={Style.title}>{el.title}</span>
+                                            </div>
+                                            <div className={Style.bottomSection}>
+                                                <div className={Style.row}>
+                                                    <div className={Style.item}>
+                                                        <span className={Style.bigText}>{el.time}</span>
+                                                    </div>
+                                                    <div className={Style.item}>
+                                                        <span className={Style.bigText}>{el.type}</span>
+                                                    </div>
+                                                    <div className={Style.item}>
+                                                        <LuDownload className={Style.downloadIcon} onClick={() => download(el.id)}></LuDownload>
+                                                        <span className={Style.regularText}>download</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    ))
+                            ) : (
+                                <div>No data found.</div>
+                            )}
                         </div>
                     </div>
-                    <div className={Style.total}>
-                        Total: {selectedType ? search.array.filter(item => item.type === selectedType).length : search.total}
-                    </div>
-                    <div className={Style.datalist}>
-                        {search.array.length > 0 ? (
-                            search.array.filter(item => !selectedType || item.type === selectedType).slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage)
-                            .map((el) => (
-                                <div className={Style.card} key={el.id}>
-                                <div className={Style.topSection}>
-                                  <div className={Style.border}></div>
-                                  <span className={Style.title}>{el.title}</span>
-                                </div>
-                                <div className={Style.bottomSection}>
-                                  <div className={Style.row}>
-                                    <div className={Style.item}>
-                                      <span className={Style.bigText}>{el.time}</span>
-                                    </div>
-                                    <div className={Style.item}>
-                                      <span className={Style.bigText}>{el.type}</span>
-                                    </div>
-                                    <div className={Style.item}>
-                                      <LuDownload className={Style.downloadIcon} onClick={()=>download(el.id)}></LuDownload>
-                                      <span className={Style.regularText}>download</span>
-                                    </div>
-                                  </div>
-                                </div>
-                              </div>
-                            ))
-                        ) : (
-                            <div>No data found.</div>
-                        )}
+                    <div className={Style.pagination}>
+                        <button
+                            onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                            disabled={currentPage === 1}
+                        >
+                            上一页
+                        </button>
+
+                        <span>第 {currentPage} 页 / 共 {Math.ceil(search.total / itemsPerPage)} 页</span>
+
+                        <button
+                            onClick={() => setCurrentPage(p => p + 1)}
+                            disabled={currentPage * itemsPerPage >= search.total}
+                        >
+                            下一页
+                        </button>
                     </div>
                 </div>
-            </div>
-            <div className={Style.pagination}>
-                <button
-                    onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
-                    disabled={currentPage === 1}
-                >
-                    上一页
-                </button>
-
-                <span>第 {currentPage} 页 / 共 {Math.ceil(search.total / itemsPerPage)} 页</span>
-
-                <button
-                    onClick={() => setCurrentPage(p => p + 1)}
-                    disabled={currentPage * itemsPerPage >= search.total}
-                >
-                    下一页
-                </button>
             </div>
             <CustomComponent />
         </div>

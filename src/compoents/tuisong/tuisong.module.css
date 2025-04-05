@@ -1,0 +1,114 @@
+.adContainer {
+    width: 300px;
+    padding: 20px;
+    perspective: 1000px;
+    top: 100px;
+    left: 50px;
+    margin: 0 60px;
+    margin-top: 70px;
+    padding: 20px;
+    transition: all 0.5s ease;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.card2 {
+    padding-top: 7px;
+    /* border-radius: 10px; */
+    border: 3px solid rgb(255, 255, 255);
+    background-size: 60px 60px;
+    background-position: 0 0, 0 0;
+    background-color: white;
+    width: 100%;
+    box-shadow: rgba(142, 142, 142, 0.3) 0px 30px 30px -10px;
+    transition: all 0.5s ease-in-out;
+  }
+  
+  .content-box {
+    background: rgb(94, 173, 247);
+    /* border-radius: 10px 100px 10px 10px; */
+    transition: all 0.5s ease-in-out;
+    padding: 35px 25px 25px 25px;
+    transform-style: preserve-3d;
+  }
+  
+  .content-box .card-title {
+    display: inline-block;
+    color: white;
+    font-size: 25px;
+    font-weight: 900;
+    transition: all 0.5s ease-in-out;
+    transform: translate3d(0px, 0px, 50px);
+  }
+  
+  
+  .content-box .card-content {
+    margin-top: 10px;
+    font-size: 15px;
+    font-weight: 700;
+    color: #f2f2f2;
+    transition: all 0.5s ease-in-out;
+    transform: translate3d(0px, 0px, 30px);
+  }
+  
+  .date-box {
+    position: absolute;
+    top: 30px;
+    left: 30px;
+    height: 60px;
+    width: 60px;
+    background: white;
+    border: 1px solid rgb(7, 185, 255);
+    /* border-radius: 10px; */
+    padding: 10px;
+    transform: translate3d(0px, 0px, 80px);
+    box-shadow: rgba(100, 100, 111, 0.2) 0px 17px 10px -10px;
+  }
+  
+  .date-box span {
+    display: block;
+    text-align: center;
+  }
+  
+  .date-box .month {
+    color: rgb(4, 193, 250);
+    font-size: 16px;
+    font-weight: 800;
+  }
+  
+  .date-box .date {
+    font-size: 12px;
+    font-weight: 600;
+    color: rgb(4, 193, 250);
+  }
+  .close {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 2rem;
+    height: 2rem;
+    border-radius: 50%;
+    border: none;
+    color: var(--primary-color);
+    background-color: var(--gradient-start);
+    cursor: pointer;
+
+  }
+  .adContainer[class*="active"] { /* 修正类名拼写 */
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.tuson {
+    display: block;
+    text-align: center;
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--accent-color);
+    text-shadow: 0 2px 3px rgba(0, 0, 0, 0.2);
+    opacity: 0.8;
+    margin-bottom: 7px;
+}
