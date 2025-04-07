@@ -51,7 +51,35 @@ export interface ComplaintData {
 }
 
 export interface AdviceData {
-  question: string
-  context?: string
+  background: string
+  issues: string[]
+  analysis: string
+  risks: string[]
+  suggestions: string[]
+  references: string[]
 }
 
+export interface HistoryItem {
+  [x: string]: string
+  id: string
+  content: string
+  date: string
+  response: string
+}
+
+export interface HistorySideBarProps {
+  setMessage: (message: string) => void
+  theme?: string
+  userChat?: string
+  userIsLoading?: boolean
+}
+
+export interface FormFieldProps {
+  label: string;
+  id: string;
+  value: string;
+  onChange: (e: React.ChangeEvent<HTMLInputElement> | React.ChangeEvent<HTMLTextAreaElement>) => void;
+  placeholder?: string;
+  textarea?: boolean;
+  className?: string;
+}

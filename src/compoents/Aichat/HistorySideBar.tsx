@@ -1,17 +1,8 @@
+import type React from "react"
+
 import { useEffect, useState } from "react"
 import { token } from "../../share/share"
-
-interface HistoryItem {
-  id: string
-  content: string
-  date: string
-  response?: string
-}
-
-interface HistorySideBarProps {
-  setMessage: (message: string) => void
-  theme?: string
-}
+import type { HistoryItem, HistorySideBarProps } from "./props"
 
 const HistorySideBar: React.FC<HistorySideBarProps> = ({ setMessage, theme = "light" }) => {
   const [data, setData] = useState<HistoryItem[]>([])
@@ -20,16 +11,19 @@ const HistorySideBar: React.FC<HistorySideBarProps> = ({ setMessage, theme = "li
   const [selectedItem, setSelectedItem] = useState<string | null>(null)
 
   useEffect(() => {
+    let isMounted = true
     const fetchHistory = async () => {
       try {
         setIsLoading(true)
-        const response = await fetch("/api/ai/history", {
+        const response = await fetch("/api/ai/theme", {
           method: "GET",
           headers: {
             "Content-Type": "application/json",
             Authorization: `Bearer ${token}`,
           },
         })
+
+        if (!isMounted) return
 
         if (!response.ok) {
           const failedToast = document.createElement("div")
@@ -50,25 +44,29 @@ const HistorySideBar: React.FC<HistorySideBarProps> = ({ setMessage, theme = "li
       } catch (error) {
         console.error("请求历史记录出错", error)
       } finally {
-        setIsLoading(false)
+        if (isMounted) {
+          setIsLoading(false)
+        }
       }
     }
 
     fetchHistory()
+
+    return () => {
+      isMounted = false
+    }
   }, [])
 
   const handleHistoryItemClick = async (item: HistoryItem) => {
     setSelectedItem(item.id)
 
-    // 如果响应已经缓存，直接显示
     if (item.response) {
       setMessage(item.response)
       return
     }
 
-    // 否则请求完整对话
     try {
-      const response = await fetch(`/api/ai/conversation/${item.id}`, {
+      const response = await fetch(`/api/ai/history?theme=${item.theme || ""}`, {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
@@ -78,7 +76,6 @@ const HistorySideBar: React.FC<HistorySideBarProps> = ({ setMessage, theme = "li
 
       if (response.ok) {
         const result = await response.json()
-        // 更新本地数据，缓存响应
         setData((prevData) => prevData.map((d) => (d.id === item.id ? { ...d, response: result.data.response } : d)))
         setMessage(result.data.response)
       } else {
@@ -89,12 +86,12 @@ const HistorySideBar: React.FC<HistorySideBarProps> = ({ setMessage, theme = "li
     }
   }
 
-  const filteredData = data.filter((item) => item.content.toLowerCase().includes(searchTerm.toLowerCase()))
+  const filteredData = data.filter((item) => (item.theme ?? "").toLowerCase().includes(searchTerm.toLowerCase()))
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString)
     if (isNaN(date.getTime())) {
-      return dateString // 返回原始字符串
+      return dateString
     }
     return new Intl.DateTimeFormat("zh-CN", {
       year: "numeric",
@@ -109,30 +106,31 @@ const HistorySideBar: React.FC<HistorySideBarProps> = ({ setMessage, theme = "li
     if (!confirm("确定要清空所有历史记录吗？此操作不可撤销。")) {
       return
     }
+    for (const item of data) {
+      try {
+        const response = await fetch(`/api/ai/delete?id=${item.id}`, {
+          method: "DELETE",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        })
 
-    try {
-      const response = await fetch("/api/ai/history/clear", {
-        method: "DELETE",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-      })
-
-      if (response.ok) {
-        setData([])
-        const successToast = document.createElement("div")
-        successToast.className = "fixed top-4 right-4 bg-green-500 text-white px-4 py-2 rounded-lg shadow-lg z-50"
-        successToast.textContent = "历史记录已清空"
-        document.body.appendChild(successToast)
-        setTimeout(() => {
-          document.body.removeChild(successToast)
-        }, 2000)
-      } else {
-        console.error("清空历史记录失败")
+        if (response.ok) {
+          setData([])
+          const successToast = document.createElement("div")
+          successToast.className = "fixed top-4 right-4 bg-green-500 text-white px-4 py-2 rounded-lg shadow-lg z-50"
+          successToast.textContent = "历史记录已清空"
+          document.body.appendChild(successToast)
+          setTimeout(() => {
+            document.body.removeChild(successToast)
+          }, 2000)
+        } else {
+          console.error("清空历史记录失败")
+        }
+      } catch (error) {
+        console.error("清空历史记录出错", error)
       }
-    } catch (error) {
-      console.error("清空历史记录出错", error)
     }
   }
 
@@ -148,7 +146,7 @@ const HistorySideBar: React.FC<HistorySideBarProps> = ({ setMessage, theme = "li
             placeholder="搜索历史记录..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full px-4 py-2 rounded-lg bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-[#5d76c5] dark:focus:ring-blue-500"
+            className="w-full px-4 py-2 rounded-lg bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-[#5d76c5] dark:focus:ring-blue-500 text-gray-800 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
           />
           {searchTerm && (
             <button
@@ -187,8 +185,8 @@ const HistorySideBar: React.FC<HistorySideBarProps> = ({ setMessage, theme = "li
                       }
                     `}
                   >
-                    <div className="font-medium truncate">{item.content}</div>
-                    <div className="text-xs mt-1 opacity-80">{formatDate(item.date)}</div>
+                    <div className="font-medium truncate">{item.theme}</div>
+                    <div className="text-xs mt-1 opacity-80">{formatDate(item.updated_at)}</div>
                   </div>
                 ))}
               </div>
@@ -210,3 +208,4 @@ const HistorySideBar: React.FC<HistorySideBarProps> = ({ setMessage, theme = "li
 }
 
 export default HistorySideBar
+

@@ -3,7 +3,6 @@ import type React from "react"
 import { useState, useEffect } from "react"
 import { Link, useNavigate } from "react-router-dom"
 
-// 定义LoginForm的props的接口
 interface LoginFormProps {
   username: string
   setUsername: React.Dispatch<React.SetStateAction<string>>
@@ -15,7 +14,6 @@ interface LoginFormProps {
   error: string
 }
 
-// 登录表单组件
 const LoginForm: React.FC<LoginFormProps> = ({
   username,
   setUsername,
@@ -40,7 +38,7 @@ const LoginForm: React.FC<LoginFormProps> = ({
             placeholder="输入你的用户名"
             value={username}
             onChange={(e) => setUsername(e.target.value)}
-            className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#5d76c5] focus:border-transparent"
+            className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#5d76c5] focus:border-transparent text-gray-800 placeholder-gray-500"
           />
         </div>
 
@@ -51,7 +49,7 @@ const LoginForm: React.FC<LoginFormProps> = ({
             placeholder="输入密码"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#5d76c5] focus:border-transparent"
+            className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#5d76c5] focus:border-transparent text-gray-800 placeholder-gray-500"
           />
         </div>
 
@@ -98,7 +96,6 @@ const Login = () => {
   const [error, setError] = useState("")
 
   useEffect(() => {
-    // 检查本地存储中是否有保存的用户信息
     const savedUsername = localStorage.getItem("username")
     const savedPassword = localStorage.getItem("password")
     const savedRememberMe = localStorage.getItem("rememberMe") === "true"
@@ -119,7 +116,6 @@ const Login = () => {
     setError("")
 
     try {
-      // 显示加载状态
       const loadingToast = document.createElement("div")
       loadingToast.className = "fixed top-4 right-4 bg-[#5d76c5] text-white px-4 py-2 rounded-lg shadow-lg z-50"
       loadingToast.textContent = "登录中..."
@@ -142,7 +138,6 @@ const Login = () => {
         timeoutPromise,
       ])
 
-      // 移除加载提示
       document.body.removeChild(loadingToast)
 
       const data = await response.json()
@@ -155,7 +150,6 @@ const Login = () => {
       console.log(data)
       console.log("login success")
 
-      // 登录成功处理
       if (rememberMe) {
         localStorage.setItem("username", username)
         localStorage.setItem("password", password)
@@ -168,13 +162,11 @@ const Login = () => {
         localStorage.setItem("token", data.data.token)
       }
 
-      // 显示成功提示
       const successToast = document.createElement("div")
       successToast.className = "fixed top-4 right-4 bg-green-500 text-white px-4 py-2 rounded-lg shadow-lg z-50"
       successToast.textContent = "登录成功，正在跳转..."
       document.body.appendChild(successToast)
 
-      // 使用原始代码中的导航路径
       setTimeout(() => {
         document.body.removeChild(successToast)
         navigate("/index")
@@ -205,4 +197,3 @@ const Login = () => {
 }
 
 export default Login
-
