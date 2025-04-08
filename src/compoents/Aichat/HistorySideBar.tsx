@@ -1,6 +1,6 @@
 import type React from "react"
 import { useEffect, useState } from "react"
-import { token } from "../../share/share"
+import { getToken } from "../../share/share"
 import type { HistoryItem } from "./types"
 
 interface HistorySideBarProps {
@@ -19,12 +19,6 @@ const HistorySideBar = ({
   const [data, setData] = useState<HistoryItem[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState("")
-  const [refreshTrigger, setRefreshTrigger] = useState(0)
-
-  // // 添加刷新历史记录的函数
-  // const refreshHistory = () => {
-  //   setRefreshTrigger((prev) => prev + 1)
-  // }
 
   useEffect(() => {
     let isMounted = true
@@ -35,7 +29,7 @@ const HistorySideBar = ({
           method: "GET",
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
+            Authorization: `Bearer ${getToken()}`,
           },
         })
 
@@ -60,16 +54,16 @@ const HistorySideBar = ({
     }
 
     fetchHistory()
-
     return () => {
       isMounted = false
     }
-  }, [refreshTrigger])
+  }, [])
 
   const handleHistoryItemClick = async (item: HistoryItem) => {
     setSelectedHistoryId(item.id)
 
     if (item.response && item.content) {
+      // 直接设置为对象，不使用JSON字符串
       setMessage({
         content: item.content,
         response: item.response,
@@ -82,7 +76,7 @@ const HistorySideBar = ({
         method: "GET",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
+          Authorization: `Bearer ${getToken()}`,
         },
       })
 
@@ -94,11 +88,14 @@ const HistorySideBar = ({
           const aiMessage = result.data.find((msg: { role: string }) => msg.role === "assistant")
 
           if (userMessage && aiMessage) {
+            // 更新历史记录数据
             setData((prevData) =>
               prevData.map((d) =>
                 d.id === item.id ? { ...d, response: aiMessage.content, content: userMessage.content } : d,
               ),
             )
+
+            // 直接设置为对象，不使用JSON字符串
             setMessage({
               content: userMessage.content,
               response: aiMessage.content,
@@ -112,6 +109,8 @@ const HistorySideBar = ({
               d.id === item.id ? { ...d, response: result.data.response, content: result.data.content } : d,
             ),
           )
+
+          // 直接设置为对象，不使用JSON字符串
           setMessage({
             content: result.data.content,
             response: result.data.response,
@@ -142,7 +141,7 @@ const HistorySideBar = ({
         method: "DELETE",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
+          Authorization: `Bearer ${getToken()}`,
         },
       })
 
@@ -196,7 +195,7 @@ const HistorySideBar = ({
           method: "DELETE",
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
+            Authorization: `Bearer ${getToken()}`,
           },
         })
 
@@ -303,7 +302,9 @@ const HistorySideBar = ({
 // 显示提示信息
 const showToast = (message: string, type: "success" | "error") => {
   const toast = document.createElement("div")
-  toast.className = `fixed top-4 right-4 ${type === "success" ? "bg-green-500" : "bg-red-500"} text-white px-4 py-2 rounded-lg shadow-lg z-50`
+  toast.className = `fixed top-4 right-4 ${
+    type === "success" ? "bg-green-500" : "bg-red-500"
+  } text-white px-4 py-2 rounded-lg shadow-lg z-50`
   toast.textContent = message
   document.body.appendChild(toast)
   setTimeout(() => {

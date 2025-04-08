@@ -1,6 +1,7 @@
 import type React from "react"
 import { useState, useRef, memo } from "react"
-import { token } from "../../share/share"
+import { getToken } from "../../share/share"
+import type { ChatBoxProps } from "./types"
 
 const ChatInputComponent = ({
   userChat,
@@ -30,14 +31,6 @@ const ChatInputComponent = ({
 
 const ChatInput = memo(ChatInputComponent)
 
-interface ChatBoxProps {
-  setMessage: React.Dispatch<React.SetStateAction<string>>
-  setIsLoading: React.Dispatch<React.SetStateAction<boolean>>
-  refreshHistory?: () => void
-  selectedHistoryId: string | null
-  setSelectedHistoryId: (id: string | null) => void
-}
-
 const ChatBox = ({
   setMessage,
   setIsLoading,
@@ -47,7 +40,6 @@ const ChatBox = ({
 }: ChatBoxProps) => {
   const [model, setModel] = useState<string>("moonshot")
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const [chatTheme, setChatTheme] = useState<string>("")
   const [inputMessage, setInputMessage] = useState<string>("")
 
   const ToggleAiModel = () => {
@@ -94,19 +86,18 @@ const ChatBox = ({
     setIsSubmitting(true)
     setIsLoading(true)
 
-    const userMessageContent = inputMessage 
-    setInputMessage("") 
+    const userMessageContent = inputMessage
+    setInputMessage("")
     try {
       const response = await fetch("/api/ai/chat", {
         method: "POST",
         headers: {
-          Authorization: `Bearer ${token}`,
+          Authorization: `Bearer ${getToken()}`,
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
           model: model,
           content: userMessageContent,
-          theme: chatTheme,
         }),
       })
 
@@ -118,14 +109,16 @@ const ChatBox = ({
           aiResponse = data.data
         } else if (data.data && typeof data.data.message === "string") {
           aiResponse = data.data.message
+        } else if (data.message && typeof data.message === "string") {
+          aiResponse = data.message
         } else {
           aiResponse = JSON.stringify(data.data || data)
         }
-
-        setMessage({
+        const messageObj = {
           content: userMessageContent,
           response: aiResponse,
-        })
+        }
+        setMessage(messageObj)
 
         if (refreshHistory) {
           refreshHistory()
@@ -189,10 +182,11 @@ const ChatBox = ({
   )
 }
 
-// 显示提示信息
 const showToast = (message: string, type: "success" | "error") => {
   const toast = document.createElement("div")
-  toast.className = `fixed top-4 right-4 ${type === "success" ? "bg-green-500" : "bg-red-500"} text-white px-4 py-2 rounded-lg shadow-lg z-50`
+  toast.className = `fixed top-4 right-4 ${
+    type === "success" ? "bg-green-500" : "bg-red-500"
+  } text-white px-4 py-2 rounded-lg shadow-lg z-50`
   toast.textContent = message
   document.body.appendChild(toast)
   setTimeout(() => {

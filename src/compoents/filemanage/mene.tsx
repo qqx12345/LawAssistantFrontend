@@ -3,7 +3,7 @@ import { FaDownload, FaHome, FaCloudUploadAlt, FaFolderOpen } from "react-icons/
 import { FaFileCirclePlus,FaFileCircleCheck } from "react-icons/fa6";
 import { IoCloseSharp } from "react-icons/io5";
 import { useState, useRef, useEffect, forwardRef } from 'react';
-import { token } from '../../share/share';
+import { getToken } from '../../share/share';
 
 const UploadModal = forwardRef(({ setupload }: { setupload: React.Dispatch<React.SetStateAction<boolean>> }, ref: React.ForwardedRef<HTMLDivElement>) => {
 
@@ -23,7 +23,7 @@ const UploadModal = forwardRef(({ setupload }: { setupload: React.Dispatch<React
     const response = await fetch('/api/file/upload', {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${token}`
+        'Authorization': `Bearer ${getToken()}`
       },
       body: formData
     });
@@ -83,7 +83,7 @@ const UploadModal = forwardRef(({ setupload }: { setupload: React.Dispatch<React
         <button className={styles.btnSecondary} onClick={close}>取消</button>
         <button
           className={styles.btnPrimary}
-          disabled={!selectedFile || uploadStatus === 'uploading'}
+          disabled={!selectedFile || uploadStatus === 'uploading'}  
           onClick={loadfile}
         >
           {uploadStatus === 'uploading' ? '上传中...' : '开始上传'}

@@ -6,7 +6,6 @@ import { BiChevronRight } from "react-icons/bi";
 import { LuDownload } from "react-icons/lu";
 import { Link, useNavigate } from "react-router";
 import AdBanner from "../tuisong/tuisong.tsx";
-import { token } from "../../share/share.ts";
 type Headers = {
     id: number,
     content: string,
@@ -44,7 +43,7 @@ type SearchProps = {
     token: string | null;
 };
 
-const Headers: React.FC<HeadersProps> = ({ setsearch, token, searchmode, setsearchmode }) => {
+const Headers: React.FC<HeadersProps> = ({ setsearch, searchmode, setsearchmode }) => {
     const [check, setCheck] = useState(1);
     const [input, setInput] = useState<string>("");
     const navigate = useNavigate();
@@ -92,7 +91,7 @@ const Headers: React.FC<HeadersProps> = ({ setsearch, token, searchmode, setsear
             const res = await fetch(`/api/file/search/${result?.path}`, {
                 method: "POST",
                 headers: {
-                    "Authorization": `Bearer ${token}`,
+                    "Authorization": `Bearer ${localStorage.getItem("token")}`,
                     "Content-Type": "application/json"
                 },
                 body: raw
@@ -183,7 +182,7 @@ const Headers: React.FC<HeadersProps> = ({ setsearch, token, searchmode, setsear
     )
 }
 
-const Search: React.FC<SearchProps> = ({ setsearch, token }) => {
+const Search: React.FC<SearchProps> = ({ setsearch }) => {
     const [searchParams, setSearchParams] = useState({
         keyword: [""],
         fileType: "",
@@ -215,7 +214,7 @@ const Search: React.FC<SearchProps> = ({ setsearch, token }) => {
             const res = await fetch(`/api/file/search/advanced`, {
                 method: "POST",
                 headers: {
-                    "Authorization": `Bearer ${token}`,
+                    "Authorization": `Bearer ${localStorage.getItem("token")}`,
                     "Content-Type": "application/json"
                 },
                 body: raw
@@ -321,7 +320,7 @@ const Index = () => {
         fetch(`/api/file/download/${id}`, {
             method: 'GET',
             headers: {
-                "Authorization": `Bearer ${token}`,
+                "Authorization": `Bearer ${localStorage.getItem("token")}`,
             },
             redirect: 'follow'
         })
@@ -355,10 +354,10 @@ const Index = () => {
 
     return (
         <div className={Style.container}>
-            <Headers setsearch={setsearch} token={token} setsearchmode={setsearchmode} searchmode={searchmode} />
-            {searchmode === 3 && <Search setsearch={setsearch} token={token}/>}
+            <Headers setsearch={setsearch} token={localStorage.getItem("token")} setsearchmode={setsearchmode} searchmode={searchmode} />
+            {searchmode === 3 && <Search setsearch={setsearch} token={localStorage.getItem("token")}/>}
             <div className={Style.banner}>
-                <AdBanner token={token} />
+                <AdBanner token={localStorage.getItem("token")} />
                 <div className={Style.content}>
                     <div className={Style.list}>
                         <div className={Style.total}>

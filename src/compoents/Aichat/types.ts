@@ -59,14 +59,6 @@ export interface AdviceData {
   references: string[];
 }
 
-export interface HistoryItem {
-  [x: string]: string;
-  id: string;
-  content: string;
-  date: string;
-  response: string;
-}
-
 export interface HistorySideBarProps {
   setMessage: (message: string) => void;
   theme?: string;
@@ -86,4 +78,21 @@ export interface FormFieldProps {
   placeholder?: string;
   textarea?: boolean;
   className?: string;
+}
+
+export interface ChatBoxProps {
+  setMessage: (message: any) => void
+  setIsLoading: (isLoading: boolean) => void
+  refreshHistory?: () => void
+  selectedHistoryId: string | null
+  setSelectedHistoryId: (id: string | null) => void
+}
+
+export interface HistoryItem {
+  id: string
+  theme: string
+  content?: string
+  response?: string
+  created_at: string
+  updated_at: string
 }

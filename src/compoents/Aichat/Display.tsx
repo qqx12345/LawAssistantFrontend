@@ -56,38 +56,66 @@ const DisplayMessage = ({ messages, isLoading = false }: DisplayMessageProps) =>
     )
   }
 
-  // 修改消息处理逻辑以适应不同的数据格式
-  // 处理消息显示
   let userContent = ""
   let aiContent = ""
 
+  const extractMessageContent = (data: any): string => {
+    if (!data) return ""
+
+    if (typeof data === "string") {
+      try {
+        const parsed = JSON.parse(data)
+        if (parsed && typeof parsed === "object") {
+          if (parsed.message) {
+            return parsed.message
+          }
+          if (parsed.data && parsed.data.message) {
+            return parsed.data.message
+          }
+        }
+        return data
+      } catch (e) {
+        console.error("JSON解析失败:", e)
+      }
+    }
+
+    if (typeof data === "object") {
+      if (data.message) {
+        return data.message
+      }
+      if (data.data && data.data.message) {
+        return data.data.message
+      }
+      if (data.content) {
+        return data.content
+      }
+      return JSON.stringify(data)
+    }
+    return String(data)
+  }
+
   if (typeof messages === "object" && messages !== null) {
     if ("content" in messages && "response" in messages) {
-      // 历史记录格式
       userContent = messages.content || ""
-      aiContent = typeof messages.response === "string" ? messages.response : JSON.stringify(messages.response)
+      aiContent = extractMessageContent(messages.response)
     } else if ("message" in messages) {
-      // API返回格式
-      aiContent = typeof messages.message === "string" ? messages.message : JSON.stringify(messages.message)
+      aiContent = extractMessageContent(messages.message)
     } else if (Array.isArray(messages.data) && messages.data.length >= 2) {
-      // API返回的历史记录数组格式
-      const userMessage = messages.data.find((msg) => msg.role === "user")
-      const aiMessage = messages.data.find((msg) => msg.role === "assistant")
+      const userMessage = messages.data.find((msg: { role: string }) => msg.role === "user")
+      const aiMessage = messages.data.find((msg: { role: string }) => msg.role === "assistant")
 
       if (userMessage && aiMessage) {
-        userContent =
-          typeof userMessage.content === "string" ? userMessage.content : JSON.stringify(userMessage.content)
-        aiContent = typeof aiMessage.content === "string" ? aiMessage.content : JSON.stringify(aiMessage.content)
+        userContent = userMessage.content || ""
+        aiContent = extractMessageContent(aiMessage.content)
       } else {
-        aiContent = JSON.stringify(messages)
+        aiContent = extractMessageContent(messages)
       }
     } else {
-      aiContent = JSON.stringify(messages)
+      aiContent = extractMessageContent(messages)
     }
   } else if (typeof messages === "string") {
-    aiContent = messages
+    aiContent = extractMessageContent(messages)
   } else {
-    // 如果不是对象也不是字符串，转换为字符串
     aiContent = String(messages)
   }
 
