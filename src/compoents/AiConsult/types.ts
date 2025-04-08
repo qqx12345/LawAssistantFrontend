@@ -1,3 +1,4 @@
+import type React from "react"
 export interface Parties {
   type: string
   name: string
@@ -11,25 +12,23 @@ export interface Content {
   sign_date: string
   rights: string
   obligations: string
-  start_date: string
-  end_date: string
-  performance: string
-  price: string
-  payment: string
-  breach: string
-  dispute: string
-  confidential: string
-  force: string
-  termination: string
-  additional: string
+  start_date?: string
+  end_date?: string
+  performance?: string
+  price?: string
+  payment?: string
+  breach?: string
+  dispute?: string
+  confidential?: string
+  force?: string
+  termination?: string
+  additional?: string
 }
 
 export interface ContraryInputProps {
-  model: string
-  doc_type: string
   title: string
   parties: Parties[]
-  content: Content
+  content: Content 
   additional: string
   onChange: (data: {
     title: string
@@ -50,6 +49,11 @@ export interface ComplaintData {
   attachments: string[]
 }
 
+export interface ComplaintInputProps {
+  complaintData: ComplaintData
+  onChange: (data: ComplaintData) => void
+}
+
 export interface AdviceData {
   background: string
   issues: string[]
@@ -59,27 +63,17 @@ export interface AdviceData {
   references: string[]
 }
 
-export interface HistoryItem {
-  [x: string]: string
-  id: string
-  content: string
-  date: string
-  response: string
-}
-
-export interface HistorySideBarProps {
-  setMessage: (message: string) => void
-  theme?: string
-  userChat?: string
-  userIsLoading?: boolean
+export interface AdviceInputProps {
+  adviceData: AdviceData
+  onChange: (data: AdviceData) => void
 }
 
 export interface FormFieldProps {
-  label: string;
-  id: string;
-  value: string;
-  onChange: (e: React.ChangeEvent<HTMLInputElement> | React.ChangeEvent<HTMLTextAreaElement>) => void;
-  placeholder?: string;
-  textarea?: boolean;
-  className?: string;
+  label: string
+  id: string
+  value: string
+  onChange: (e: React.ChangeEvent<HTMLInputElement> | React.ChangeEvent<HTMLTextAreaElement>) => void
+  placeholder?: string
+  textarea?: boolean
+  className?: string
 }

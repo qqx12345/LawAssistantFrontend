@@ -6,6 +6,7 @@ import Chat from './compoents/Aichat/index';
 import Register from './compoents/Login/Register';
 import Index from './compoents/filemanage/Index';
 import Home from './compoents/Index/Home';
+import LawDocGeneratePage from './compoents/AiConsult';
 
 function App() {
   return (
@@ -17,6 +18,7 @@ function App() {
           <Route path="/chat" element={<Chat/>}></Route>
           <Route path="/register" element={<Register/>}></Route>
           <Route path="/index" element={<Index/>}></Route>
+          <Route path='/consult' element={<LawDocGeneratePage/>}></Route>
         </Routes>
       </BrowserRouter>
     </QueryClientProvider>

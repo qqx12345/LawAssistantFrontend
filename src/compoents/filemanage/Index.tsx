@@ -122,7 +122,12 @@ const Headers: React.FC<HeadersProps> = ({ setsearch, token, searchmode, setsear
     const handleNavClick = (id: number) => {
         setCheck(id);
         if (id === 3) {
+            navigate('/consult');
+        } else if (id === 4) {
             navigate('/chat');
+        }
+        else {
+            navigate('/index');
         }
     }
 
