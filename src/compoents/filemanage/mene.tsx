@@ -3,6 +3,7 @@ import { FaDownload, FaHome, FaCloudUploadAlt, FaFolderOpen } from "react-icons/
 import { FaFileCirclePlus,FaFileCircleCheck } from "react-icons/fa6";
 import { IoCloseSharp } from "react-icons/io5";
 import { useState, useRef, useEffect, forwardRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { getToken } from '../../share/share';
 
 const UploadModal = forwardRef(({ setupload }: { setupload: React.Dispatch<React.SetStateAction<boolean>> }, ref: React.ForwardedRef<HTMLDivElement>) => {
@@ -97,6 +98,7 @@ const UploadModal = forwardRef(({ setupload }: { setupload: React.Dispatch<React
 const CustomComponent = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [upload, setupload] = useState(false);
+  const navigator = useNavigate();
   useEffect(() => {
     console.log(ref.current?.classList);
     if (!upload) {
@@ -125,7 +127,7 @@ const CustomComponent = () => {
             <FaDownload aria-hidden="true" />
             <span style={{ fontSize: '15px' }}>下载客户端</span>
           </div>
-          <div className={`${styles['fa-tachometer']}`}>
+          <div className={`${styles['fa-tachometer']}`} onClick={()=>navigator("/")}>
             <FaHome aria-hidden="true" />
             <span style={{ fontSize: '15px' }}>回到首页</span>
           </div>
