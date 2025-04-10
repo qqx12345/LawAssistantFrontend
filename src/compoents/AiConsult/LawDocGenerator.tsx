@@ -5,7 +5,9 @@ import type { AdviceData, ComplaintData, Content, Parties } from "./types"
 import ContraryInput from "./ContraryInput"
 import ComplaintInput from "./ComplaintInput"
 import AdviceInput from "./AdviceInput"
-import { toast } from "react-toastify"
+import { showToast } from "../../utils/toast"
+import { fetchWithAuth } from "../../utils/api"
+import { AIModelSelector, SubmitButton } from "../../utils/ui"
 
 const LawDocGenerator = () => {
   const [model, setModel] = useState<string>("moonshot")
@@ -85,32 +87,11 @@ const LawDocGenerator = () => {
     )
   }
 
-  const ToggleAiModel = () => {
-    return (
-      <div className="mb-3">
-        <label htmlFor="ai-model-select" className="block text-sm font-medium text-gray-700 mb-1">
-          选择AI模型:
-        </label>
-        <select
-          id="ai-model-select"
-          style={{ height: "30px" }}
-          className="w-full md:w-60 px-3 py-0 rounded-lg bg-white border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#5d76c5] text-gray-800 text-sm"
-          onChange={(e) => setModel(e.target.value)}
-          value={model}
-        >
-          <option value="moonshot">Moonshot</option>
-          <option value="deepseek-reasoner">Deepseek-R1</option>
-          <option value="deepseek-chat">Deepseek-V3</option>
-        </select>
-      </div>
-    )
-  }
-
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
 
     if (!documentType) {
-      toast.error("请选择文档类型")
+      showToast("请选择文档类型", "error")
       return
     }
 
@@ -118,73 +99,45 @@ const LawDocGenerator = () => {
     setIsLoading(true)
 
     try {
-      let response
-
-      // 获取token
-      const token = localStorage.getItem("token")
-      if (!token) {
-        toast.error("请先登录")
-        return
-      }
+      // 确定要使用的API端点和请求数据
+      let endpoint = "";
+      let requestData = {};
 
       if (documentType === "contrary") {
-        response = await fetch("/api/ai/contract", {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            model: model,
-            doc_type: "contrary",
-            title: contraryData.title,
-            parties: contraryData.parties,
-            content: contraryData.content,
-            additional: contraryData.additional,
-          }),
-        })
+        endpoint = "/api/ai/contract";
+        requestData = {
+          model,
+          doc_type: "contrary",
+          title: contraryData.title,
+          parties: contraryData.parties,
+          content: contraryData.content,
+          additional: contraryData.additional,
+        };
       } else if (documentType === "complaint") {
-        response = await fetch("/api/ai/complain", {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            model: model,
-            content: complaintData,
-          }),
-        })
+        endpoint = "/api/ai/complain";
+        requestData = {
+          model,
+          content: complaintData,
+        };
       } else if (documentType === "advice") {
-        response = await fetch("/api/ai/opinion", {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            model: model,
-            content: adviceData,
-          }),
-        })
+        endpoint = "/api/ai/opinion";
+        requestData = {
+          model,
+          content: adviceData,
+        };
       }
 
-      if (response && response.status === 200) {
-        const data = await response.json()
-        setResultMessage(data.data || data)
-
-        toast.success("请求成功，正在处理...")
-      } else {
-        const errorData = await response?.json()
-        console.error("请求失败:", errorData)
-        toast.error("请求失败，请稍后再试")
-      }
+      // 使用fetchWithAuth发送请求
+      const result = await fetchWithAuth(endpoint, "POST", requestData);
+      
+      setResultMessage(result.data || result);
+      showToast("请求成功，正在处理...", "success");
     } catch (error) {
-      console.error("请求出错:", error)
-      toast.error("请求出错，请稍后再试")
+      console.error("请求出错:", error);
+      showToast("请求出错，请稍后再试", "error");
     } finally {
-      setIsSubmitting(false)
-      setIsLoading(false)
+      setIsSubmitting(false);
+      setIsLoading(false);
     }
   }
 
@@ -196,7 +149,10 @@ const LawDocGenerator = () => {
 
       <div className="flex flex-col sm:flex-row justify-between bg-white text-gray-800 rounded-lg p-2 mt-2 mx-4">
         <SelectBar />
-        <ToggleAiModel />
+        <AIModelSelector 
+          model={model} 
+          setModel={setModel}
+        />
       </div>
 
       <div className="p-4 bg-white text-gray-800 shadow-inner mx-4 mb-4 rounded-b-lg">
@@ -226,17 +182,12 @@ const LawDocGenerator = () => {
 
         {documentType && (
           <form onSubmit={handleSubmit} className="mt-3">
-            <button
-              type="submit"
-              disabled={isSubmitting}
-              className={`w-full py-2 rounded-lg transition-colors ${
-                isSubmitting
-                  ? "bg-gray-300 text-gray-500 cursor-not-allowed"
-                  : "bg-[#5d76c5] hover:bg-[#3a5199] text-white"
-              }`}
-            >
-              {isSubmitting ? "处理中..." : "提交请求"}
-            </button>
+            <SubmitButton
+              isSubmitting={isSubmitting}
+              isDisabled={!documentType}
+              text="提交请求"
+              loadingText="处理中..."
+            />
           </form>
         )}
       </div>

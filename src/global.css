@@ -1,0 +1,81 @@
+/* 全局样式 */
+
+/* 自定义滚动条样式 */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 5px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: linear-gradient(to bottom, #5d76c5, #3a5199);
+  border-radius: 10px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(to bottom, #4a5fa3, #324785);
+}
+
+/* 通用动画效果 */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.fade-in {
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+/* 浮动气泡背景装饰 */
+.bubble {
+  position: absolute;
+  border-radius: 50%;
+  background: linear-gradient(to right bottom, rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0.1));
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  z-index: -1;
+  animation: float 8s ease-in-out infinite alternate;
+}
+
+@keyframes float {
+  0% {
+    transform: translateY(0) translateX(0);
+  }
+  50% {
+    transform: translateY(-10px) translateX(5px);
+  }
+  100% {
+    transform: translateY(5px) translateX(-5px);
+  }
+}
+
+/* 渐变背景 */
+.gradient-bg {
+  background-image: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+}
+
+/* 动画加载器 */
+.loader {
+  width: 30px;
+  height: 30px;
+  border: 3px solid rgba(93, 118, 197, 0.3);
+  border-radius: 50%;
+  border-top-color: #5d76c5;
+  animation: spin 1s ease-in-out infinite;
+  margin: 0 auto;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}

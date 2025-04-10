@@ -1,5 +1,3 @@
-"use client"
-
 import FormField from "./FormField"
 import type { ComplaintInputProps } from "./types"
 

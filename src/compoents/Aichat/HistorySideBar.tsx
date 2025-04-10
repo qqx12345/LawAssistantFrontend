@@ -1,322 +1,298 @@
-import type React from "react"
-import { useEffect, useState } from "react"
-import { getToken } from "../../share/share"
-import type { HistoryItem } from "./types"
+import type React from "react";
+import { useEffect, useState } from "react";
+import { fetchWithAuth } from "../../utils/api";
+import { showToast } from "../../utils/toast";
+import type { HistoryItem, ChatMessage } from "./types";
 
 interface HistorySideBarProps {
-  setMessage: (message: any) => void
-  setUserMessage?: (message: string) => void
-  setSelectedHistoryId: (id: string | null) => void
-  selectedHistoryId: string | null
+  setMessages: (messages: ChatMessage[]) => void;
+  setSelectedHistoryId: (id: string | null) => void;
+  selectedHistoryId: string | null;
+  setCurrentTheme: (theme: string) => void;
 }
 
-const HistorySideBar = ({
-  setMessage,
-  setUserMessage,
+const HistorySideBar: React.FC<HistorySideBarProps> = ({
+  setMessages,
   setSelectedHistoryId,
   selectedHistoryId,
+  setCurrentTheme,
 }: HistorySideBarProps) => {
-  const [data, setData] = useState<HistoryItem[]>([])
-  const [isLoading, setIsLoading] = useState(true)
-  const [searchTerm, setSearchTerm] = useState("")
+  const [data, setData] = useState<HistoryItem[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [searchTerm, setSearchTerm] = useState("");
 
   useEffect(() => {
-    let isMounted = true
+    let isMounted = true;
+
     const fetchHistory = async () => {
+      if (!isMounted) return;
+      setIsLoading(true);
       try {
-        setIsLoading(true)
-        const response = await fetch("/api/ai/theme", {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${getToken()}`,
-          },
-        })
-
-        if (!isMounted) return
-
-        if (!response.ok) {
-          showToast("获取历史记录失败", "error")
-          console.error("获取历史记录失败", response)
-          setIsLoading(false)
-          return
+        const response = await fetchWithAuth("/api/ai/theme", "GET");
+        if (response.code === 200 && response.data) {
+          if (isMounted) {
+            setData(response.data);
+          }
+        } else {
+          showToast("获取历史记录失败", "error");
         }
-
-        const result = await response.json()
-        setData(result.data || [])
-      } catch (error) {
-        console.error("请求历史记录出错", error)
+      } catch {
+        if (isMounted) {
+          showToast("获取历史记录失败", "error");
+        }
       } finally {
         if (isMounted) {
-          setIsLoading(false)
+          setIsLoading(false);
         }
       }
-    }
+    };
 
-    fetchHistory()
+    fetchHistory();
+
+    const refreshHandler = () => {
+      fetchHistory();
+    };
+
+    window.addEventListener("refresh-history", refreshHandler);
+
     return () => {
-      isMounted = false
-    }
-  }, [])
+      isMounted = false;
+      window.removeEventListener("refresh-history", refreshHandler);
+    };
+  }, []);
 
+  //
   const handleHistoryItemClick = async (item: HistoryItem) => {
-    setSelectedHistoryId(item.id)
+    //
+    try {
+      setSelectedHistoryId(item.id);
+      setIsLoading(true);
+      setCurrentTheme(item.theme);
 
-    if (item.response && item.content) {
-      // 直接设置为对象，不使用JSON字符串
-      setMessage({
-        content: item.content,
-        response: item.response,
-      })
-      return
+      //
+      const result = await fetchWithAuth(
+        `/api/ai/history?theme=${encodeURIComponent(item.theme || "")}`,
+        "GET"
+      );
+
+      //
+      const chatMessages: ChatMessage[] = [];
+
+      if (result.data && Array.isArray(result.data)) {
+        // API
+        result.data.forEach(
+          (msg: { role: string; content: string; created_at?: string }) => {
+            // msg.role
+            const role = msg.role === "user" ? "user" : "assistant";
+            chatMessages.push({
+              role: role,
+              content: msg.content,
+              timestamp: msg.created_at
+                ? new Date(msg.created_at).getTime()
+                : new Date().getTime(),
+            });
+          }
+        );
+      } else if (result.data?.content && result.data?.response) {
+        // API
+        //
+        chatMessages.push({
+          role: "user",
+          content: result.data.content as string,
+          timestamp: new Date(item.updated_at).getTime(),
+        });
+
+        // AI
+        chatMessages.push({
+          role: "assistant",
+          content: result.data.response as string,
+          timestamp: new Date(item.updated_at).getTime() + 1, //
+        });
+      } else if (item.content && item.response) {
+        //
+        //
+        chatMessages.push({
+          role: "user",
+          content: item.content,
+          timestamp: new Date(item.updated_at).getTime(),
+        });
+
+        // AI
+        chatMessages.push({
+          role: "assistant",
+          content: item.response,
+          timestamp: new Date(item.updated_at).getTime() + 1, //
+        });
+      }
+
+      //
+      setMessages(chatMessages);
+      setIsLoading(false);
+    } catch {
+      console.error("获取历史记录失败");
+      setIsLoading(false);
+      showToast("获取历史记录失败", "error");
     }
+  };
+
+  //
+  const deleteHistoryItem = async (itemId: string, e: React.MouseEvent) => {
+    e.stopPropagation(); //
 
     try {
-      const response = await fetch(`/api/ai/history?theme=${item.theme || ""}`, {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${getToken()}`,
-        },
-      })
+      await fetchWithAuth(`/api/ai/delete?id=${itemId}`, "DELETE");
 
-      if (response.ok) {
-        const result = await response.json()
+      // 删除成功后更新历史记录列表
+      setData((prevData) => prevData.filter((item) => item.id !== itemId));
 
-        if (result.data && Array.isArray(result.data) && result.data.length >= 2) {
-          const userMessage = result.data.find((msg: { role: string }) => msg.role === "user")
-          const aiMessage = result.data.find((msg: { role: string }) => msg.role === "assistant")
-
-          if (userMessage && aiMessage) {
-            // 更新历史记录数据
-            setData((prevData) =>
-              prevData.map((d) =>
-                d.id === item.id ? { ...d, response: aiMessage.content, content: userMessage.content } : d,
-              ),
-            )
-
-            // 直接设置为对象，不使用JSON字符串
-            setMessage({
-              content: userMessage.content,
-              response: aiMessage.content,
-            })
-            return
-          }
-        }
-        if (result.data && result.data.response && result.data.content) {
-          setData((prevData) =>
-            prevData.map((d) =>
-              d.id === item.id ? { ...d, response: result.data.response, content: result.data.content } : d,
-            ),
-          )
-
-          // 直接设置为对象，不使用JSON字符串
-          setMessage({
-            content: result.data.content,
-            response: result.data.response,
-          })
-        } else {
-          console.error("历史记录数据格式不符合预期", result)
-          showToast("历史记录数据格式不符合预期", "error")
-        }
-      } else {
-        console.error("获取对话详情失败")
-        showToast("获取对话详情失败", "error")
+      // 如果删除的历史记录是当前选中的，则清空当前选中记录和消息列表
+      if (selectedHistoryId === itemId) {
+        setSelectedHistoryId(null);
+        setMessages([]);
       }
-    } catch (error) {
-      console.error("请求对话详情出错", error)
-      showToast("请求对话详情出错", "error")
+
+      showToast("历史记录删除成功", "success");
+    } catch {
+      showToast("删除历史记录失败", "error");
     }
-  }
+  };
 
-  const deleteHistoryItem = async (id: string, e: React.MouseEvent) => {
-    e.stopPropagation()
-
-    if (!confirm("确定要删除这条历史记录吗？")) {
-      return
-    }
-
-    try {
-      const response = await fetch(`/api/ai/delete?id=${id}`, {
-        method: "DELETE",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${getToken()}`,
-        },
-      })
-
-      if (response.ok) {
-        setData((prevData) => prevData.filter((item) => item.id !== id))
-
-        if (selectedHistoryId === id) {
-          setSelectedHistoryId(null)
-          setMessage("")
-          if (setUserMessage) {
-            setUserMessage("")
-          }
-        }
-
-        showToast("历史记录已删除", "success")
-      } else {
-        console.error("删除历史记录失败")
-        showToast("删除历史记录失败", "error")
-      }
-    } catch (error) {
-      console.error("删除历史记录出错", error)
-      showToast("删除历史记录出错", "error")
-    }
-  }
-
-  const filteredData = data.filter((item) => (item.theme ?? "").toLowerCase().includes(searchTerm.toLowerCase()))
-
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString)
-    if (isNaN(date.getTime())) {
-      return dateString
-    }
-    return new Intl.DateTimeFormat("zh-CN", {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-    }).format(date)
-  }
-
+  //
   const clearHistory = async () => {
-    if (!confirm("确定要清空所有历史记录吗？此操作不可撤销。")) {
-      return
-    }
-
-    let hasError = false
-    for (const item of data) {
-      try {
-        const response = await fetch(`/api/ai/delete?id=${item.id}`, {
-          method: "DELETE",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${getToken()}`,
-          },
-        })
-
-        if (!response.ok) {
-          hasError = true
-          console.error(`清空历史记录失败: ${item.id}`)
+    try {
+      // 删除所有历史记录
+      let hasError = false;
+      for (const item of data) {
+        try {
+          await fetchWithAuth(`/api/ai/delete?id=${item.id}`, "DELETE");
+        } catch {
+          hasError = true;
+          console.error("删除历史记录失败");
         }
-      } catch (error) {
-        hasError = true
-        console.error("清空历史记录出错", error)
       }
-    }
 
-    if (!hasError) {
-      setData([])
-      setSelectedHistoryId(null)
-      setMessage("")
-      if (setUserMessage) {
-        setUserMessage("")
+      // 删除成功后更新历史记录列表和消息列表
+      if (!hasError) {
+        setData([]);
+        setSelectedHistoryId(null);
+        setMessages([]);
+        showToast("历史记录清空成功", "success");
+      } else {
+        showToast("部分历史记录删除失败", "error");
       }
-      showToast("历史记录已清空", "success")
-    } else {
-      showToast("部分历史记录清空失败", "error")
+    } catch {
+      showToast("清空历史记录失败", "error");
     }
-  }
+  };
+
+  //
+  const filteredData = data.filter((item) =>
+    item.theme.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   return (
-    <div className="flex flex-col h-full bg-[#f5f8ff] text-gray-800">
-      <div className="p-4 border-b border-gray-200">
-        <h2 className="text-xl font-bold mb-4 text-[#3a5199]">历史记录</h2>
-        <div className="relative">
-          <input
-            type="text"
-            placeholder="搜索历史记录..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full px-4 py-2 rounded-lg bg-white border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#5d76c5] text-gray-800 placeholder-gray-500"
-          />
-          {searchTerm && (
-            <button
-              onClick={() => setSearchTerm("")}
-              className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500"
-            >
-              ✕
-            </button>
-          )}
-        </div>
+    <div className="flex flex-col h-full p-4 overflow-hidden">
+      {/* */}
+      <div className="flex justify-between items-center mb-4">
+        <h2 className="text-xl font-bold text-[#3a5199]">历史记录</h2>
+        <button
+          className="p-2 text-sm rounded-lg bg-gradient-to-r from-[#5d76c5] to-[#3a5199] hover:from-[#4a5fa3] hover:to-[#324785] text-white shadow-md transition-all"
+          onClick={clearHistory}
+          aria-label="清空所有历史记录"
+        >
+          清空历史
+        </button>
       </div>
 
+      {/* */}
+      <div className="relative mb-4">
+        <input
+          type="text"
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          placeholder="搜索历史记录"
+          className="w-full px-4 py-3 pr-10 rounded-xl border border-white/30 bg-white/50 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-[#5d76c5] focus:border-transparent text-gray-800 placeholder-gray-500 shadow-sm"
+        />
+        <span className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            className="h-5 w-5"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+            strokeWidth={2}
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+            />
+          </svg>
+        </span>
+      </div>
+
+      {/* */}
       {isLoading ? (
         <div className="flex-1 flex items-center justify-center">
-          <div className="animate-spin h-8 w-8 border-4 border-[#5d76c5] rounded-full border-t-transparent"></div>
+          <div className="loader">加载中...</div>
+        </div>
+      ) : data.length === 0 ? (
+        <div className="flex-1 flex items-center justify-center">
+          <p className="text-gray-500">暂无历史记录</p>
         </div>
       ) : (
-        <>
-          <div className="flex-1 overflow-y-auto p-2">
-            {filteredData.length === 0 ? (
-              <div className="text-center p-4 text-gray-500">{searchTerm ? "没有匹配的记录" : "暂无历史记录"}</div>
-            ) : (
-              <div className="space-y-2">
-                {filteredData.map((item) => (
-                  <div
-                    key={item.id}
-                    onClick={() => handleHistoryItemClick(item)}
-                    className={`
-                      p-3 rounded-lg cursor-pointer transition-colors relative group
-                      ${selectedHistoryId === item.id ? "bg-[#5d76c5] text-white" : "hover:bg-[#e3ebff]"}
-                    `}
-                  >
-                    <div className="font-medium truncate">{item.theme}</div>
-                    <div className="text-xs mt-1 opacity-80">{formatDate(item.updated_at)}</div>
-                    {/* 添加删除按钮 */}
-                    <button
-                      onClick={(e) => deleteHistoryItem(item.id, e)}
-                      className={`
-                        absolute right-2 top-2 opacity-0 group-hover:opacity-100 transition-opacity
-                        p-1 rounded-full hover:bg-red-500 hover:text-white
-                        ${selectedHistoryId === item.id ? "text-white" : "text-gray-500"}
-                      `}
-                      title="删除此记录"
-                    >
-                      ✕
-                    </button>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-
-          <div className="p-4 border-t border-gray-200">
-            <button
-              onClick={clearHistory}
-              className="w-full px-4 py-2 text-sm bg-red-500 hover:bg-red-600 text-white rounded-lg transition-colors"
+        <div className="flex-1 overflow-y-auto pr-2 space-y-3 custom-scrollbar">
+          {filteredData.map((item) => (
+            <div
+              key={item.id}
+              className={`p-4 rounded-xl cursor-pointer backdrop-blur-sm border transition-all duration-300 ${
+                selectedHistoryId === item.id
+                  ? "border-[#5d76c5] bg-white/70 shadow-md"
+                  : "border-white/30 bg-white/50 hover:bg-white/60 hover:shadow-sm"
+              }`}
+              onClick={() => handleHistoryItemClick(item)}
             >
-              清空历史记录
-            </button>
-          </div>
-        </>
+              <div className="flex justify-between items-center mb-2">
+                <span className="font-medium text-[#3a5199] truncate flex-1">
+                  {item.theme || "无标题对话"}
+                </span>
+                <button
+                  className="text-gray-500 hover:text-red-500 transition-colors p-1 rounded-full hover:bg-red-50"
+                  onClick={(e) => deleteHistoryItem(item.id, e)}
+                  aria-label="删除此历史记录"
+                  title="删除此历史记录"
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-5 w-5"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    strokeWidth={2}
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                    />
+                  </svg>
+                </button>
+              </div>
+              <div className="text-sm text-gray-600 truncate">
+                {item.content
+                  ? item.content.substring(0, 50) +
+                    (item.content.length > 50 ? "..." : "")
+                  : ""}
+              </div>
+              <div className="text-xs text-gray-400 mt-2">
+                {new Date(item.updated_at).toLocaleString("zh-CN")}
+              </div>
+            </div>
+          ))}
+        </div>
       )}
     </div>
-  )
-}
+  );
+};
 
-// 显示提示信息
-const showToast = (message: string, type: "success" | "error") => {
-  const toast = document.createElement("div")
-  toast.className = `fixed top-4 right-4 ${
-    type === "success" ? "bg-green-500" : "bg-red-500"
-  } text-white px-4 py-2 rounded-lg shadow-lg z-50`
-  toast.textContent = message
-  document.body.appendChild(toast)
-  setTimeout(() => {
-    document.body.removeChild(toast)
-  }, 2000)
-}
-
-// 导出刷新历史记录函数
-export const refreshHistorySidebar = () => {
-  // 这里使用自定义事件来触发刷新
-  const event = new CustomEvent("refresh-history")
-  window.dispatchEvent(event)
-}
-
-export default HistorySideBar
+export default HistorySideBar;

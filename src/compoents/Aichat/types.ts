@@ -57,13 +57,39 @@ export interface AdviceData {
   risks: string[];
   suggestions: string[];
   references: string[];
+} 
+
+export interface MessageType {
+  id?: string;
+  content: string;
+  response: string;
+  theme: string;
+  timestamp?: number;
+}
+
+export interface ChatMessage {
+  role: 'user' | 'assistant';
+  content: string;
+  timestamp?: number;
 }
 
 export interface HistorySideBarProps {
-  setMessage: (message: string) => void;
-  theme?: string;
-  userChat?: string;
-  userIsLoading?: boolean;
+  setMessages: (messages: ChatMessage[]) => void;
+  setUserMessage?: (message: string) => void;
+  setSelectedHistoryId: (id: string | null) => void;
+  selectedHistoryId: string | null;
+  setCurrentTheme: (theme: string) => void;
+}
+
+export interface ChatBoxProps {
+  addMessage: (message: ChatMessage) => void;
+  messages: ChatMessage[];
+  setIsLoading: (isLoading: boolean) => void;
+  refreshHistory: () => void;
+  selectedHistoryId: string | null;
+  setSelectedHistoryId: (id: string | null) => void;
+  currentTheme: string;
+  setCurrentTheme: (theme: string) => void;
 }
 
 export interface FormFieldProps {
@@ -78,14 +104,6 @@ export interface FormFieldProps {
   placeholder?: string;
   textarea?: boolean;
   className?: string;
-}
-
-export interface ChatBoxProps {
-  setMessage: (message: any) => void
-  setIsLoading: (isLoading: boolean) => void
-  refreshHistory?: () => void
-  selectedHistoryId: string | null
-  setSelectedHistoryId: (id: string | null) => void
 }
 
 export interface HistoryItem {

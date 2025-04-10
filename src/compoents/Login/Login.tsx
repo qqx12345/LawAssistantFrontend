@@ -25,8 +25,8 @@ const LoginForm: React.FC<LoginFormProps> = ({
   error,
 }) => {
   return (
-    <div className="w-96 rounded-3xl overflow-hidden shadow-xl bg-white">
-      <div className="p-8 bg-[#e3ebff] rounded-t-3xl">
+    <div className="w-96 rounded-3xl overflow-hidden shadow-2xl bg-white/70 backdrop-blur-sm border border-white/20">
+      <div className="p-8 bg-gradient-to-r from-blue-200/50 to-indigo-200/50 rounded-t-3xl">
         <h2 className="text-2xl font-bold text-[#3a5199] mb-2">智能法律助手</h2>
         <p className="text-[#5d76c5] mb-4">AI驱动的法律解决方案</p>
       </div>
@@ -38,7 +38,7 @@ const LoginForm: React.FC<LoginFormProps> = ({
             placeholder="输入你的用户名"
             value={username}
             onChange={(e) => setUsername(e.target.value)}
-            className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#5d76c5] focus:border-transparent text-gray-800 placeholder-gray-500"
+            className="w-full px-4 py-3 rounded-xl border border-white/30 bg-white/50 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-[#5d76c5] focus:border-transparent text-gray-800 placeholder-gray-500"
           />
         </div>
 
@@ -49,7 +49,7 @@ const LoginForm: React.FC<LoginFormProps> = ({
             placeholder="输入密码"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#5d76c5] focus:border-transparent text-gray-800 placeholder-gray-500"
+            className="w-full px-4 py-3 rounded-xl border border-white/30 bg-white/50 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-[#5d76c5] focus:border-transparent text-gray-800 placeholder-gray-500"
           />
         </div>
 
@@ -72,7 +72,7 @@ const LoginForm: React.FC<LoginFormProps> = ({
 
         <button
           type="submit"
-          className="w-full py-3 bg-[#5d76c5] hover:bg-[#3a5199] text-white rounded-xl transition duration-200 font-medium"
+          className="w-full py-3 bg-gradient-to-r from-[#5d76c5] to-[#3a5199] hover:from-[#4a5fa3] hover:to-[#324785] text-white rounded-xl transition duration-200 font-medium shadow-lg"
         >
           登录
         </button>
@@ -178,9 +178,16 @@ const Login = () => {
   }
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-[#e3ebff] p-4">
-      <div className="mb-8 text-center">
-        <h1 className="text-3xl font-bold text-[#3a5199]">LAW ASSISTANT</h1>
+    <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-br from-blue-100 to-indigo-200 p-4 relative overflow-hidden">
+      {/* 装饰性气泡背景 */}
+      <div className="absolute top-1/4 left-1/4 w-32 h-32 rounded-full bg-blue-300/30 backdrop-blur-sm animate-float-slow"></div>
+      <div className="absolute bottom-1/4 right-1/4 w-40 h-40 rounded-full bg-indigo-300/20 backdrop-blur-sm animate-float-medium"></div>
+      <div className="absolute top-1/3 right-1/3 w-24 h-24 rounded-full bg-blue-200/30 backdrop-blur-sm animate-float-fast"></div>
+      <div className="absolute bottom-1/3 left-1/3 w-36 h-36 rounded-full bg-indigo-200/20 backdrop-blur-sm animate-float-medium"></div>
+      
+      <div className="mb-8 text-center z-10">
+        <h1 className="text-3xl font-bold text-[#3a5199] mb-2">LAW ASSISTANT</h1>
+        <p className="text-[#5d76c5]">智能法律助手 · AI驱动</p>
       </div>
       <LoginForm
         username={username}

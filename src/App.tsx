@@ -7,18 +7,35 @@ import Register from './compoents/Login/Register';
 import Index from './compoents/filemanage/Index';
 import Home from './compoents/Index/Home';
 import LawDocGeneratePage from './compoents/AiConsult';
+import ProtectedRoute from './components/ProtectedRoute';
+import { Toaster } from 'react-hot-toast';
 
 function App() {
   return (
     <QueryClientProvider client={new QueryClient()}>
       <BrowserRouter>
+        <Toaster position="top-center" />
         <Routes>
           <Route path="/" element={<Home/>} />
           <Route path="/login" element={<Login />} />
-          <Route path="/chat" element={<Chat/>}></Route>
-          <Route path="/register" element={<Register/>}></Route>
-          <Route path="/index" element={<Index/>}></Route>
-          <Route path='/consult' element={<LawDocGeneratePage/>}></Route>
+          <Route path="/register" element={<Register/>} />
+          
+          {/* 受保护的路由 - 需要登录才能访问 */}
+          <Route path="/chat" element={
+            <ProtectedRoute>
+              <Chat/>
+            </ProtectedRoute>
+          } />
+          <Route path="/index" element={
+            <ProtectedRoute>
+              <Index/>
+            </ProtectedRoute>
+          } />
+          <Route path='/consult' element={
+            <ProtectedRoute>
+              <LawDocGeneratePage/>
+            </ProtectedRoute>
+          } />
         </Routes>
       </BrowserRouter>
     </QueryClientProvider>

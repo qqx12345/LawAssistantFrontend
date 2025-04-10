@@ -1,7 +1,5 @@
-"use client"
-
-import FormField from "./FormField"
-import type { AdviceInputProps } from "./types"
+import FormField from "./FormField";
+import type { AdviceInputProps } from "./types";
 
 const AdviceInput = ({ adviceData, onChange }: AdviceInputProps) => {
   return (
@@ -11,7 +9,9 @@ const AdviceInput = ({ adviceData, onChange }: AdviceInputProps) => {
         label="法律问题背景"
         id="background"
         value={adviceData.background}
-        onChange={(e) => onChange({ ...adviceData, background: e.target.value })}
+        onChange={(e) =>
+          onChange({ ...adviceData, background: e.target.value })
+        }
         placeholder="输入法律问题背景"
         className="mb-4"
         textarea={true}
@@ -90,7 +90,7 @@ const AdviceInput = ({ adviceData, onChange }: AdviceInputProps) => {
         className="mb-4"
       />
     </div>
-  )
-}
+  );
+};
 
-export default AdviceInput
+export default AdviceInput;
